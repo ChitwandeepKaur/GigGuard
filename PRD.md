@@ -19,7 +19,7 @@ The State Farm Financial Wellness track asks for projects that:
 - Improve financial literacy → Insurance Hub (PDF summary, gamified quiz, chatbot)
 - Help people plan for the unexpected → Survival Mode, Shock Event Planner
 - Make financial products more accessible for underserved communities → Gig workers are 73M strong and ignored by every existing tool
-- Examples mentioned on slide: budgeting tools, insurance education, risk calculators, emergency planning apps → GigShield covers all four
+- Examples mentioned on slide: budgeting tools, insurance education, risk calculators, emergency planning apps → GigGuard covers all four
 
 Judging criteria: Innovation, technical execution, accessibility, real-world impact
 

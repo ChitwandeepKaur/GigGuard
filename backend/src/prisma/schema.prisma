@@ -1,0 +1,106 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String   @id @default(uuid())
+  email       String   @unique
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  profile     UserProfile?
+  incomeLog   IncomeEntry[]
+  expenses    ExpenseProfile?
+  insurance   InsurancePolicy?
+}
+
+model UserProfile {
+  id                String   @id @default(uuid())
+  userId            String   @unique
+  user              User     @relation(fields: [userId], references: [id])
+
+  gigTypes          String[] // ["rideshare", "delivery", "freelance"]
+  incomeFrequency   String   // "daily" | "weekly" | "random"
+  weeklyLow         Float
+  weeklyHigh        Float
+  worstWeek         Float
+  bestWeek          Float
+
+  floorIncome       Float    // computed
+  averageIncome     Float    // computed
+  volatilityScore   Float    // computed
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model ExpenseProfile {
+  id              String  @id @default(uuid())
+  userId          String  @unique
+  user            User    @relation(fields: [userId], references: [id])
+
+  // Non-negotiable (weekly amounts)
+  rent            Float   @default(0)
+  utilities       Float   @default(0)
+  debtMinimums    Float   @default(0)
+  transport       Float   @default(0)
+  groceries       Float   @default(0)
+  insurance       Float   @default(0)
+
+  // Semi-flexible
+  phone           Float   @default(0)
+  subscriptions   Float   @default(0)
+  childcare       Float   @default(0)
+
+  // Fully flexible
+  eatingOut       Float   @default(0)
+  shopping        Float   @default(0)
+  entertainment   Float   @default(0)
+
+  survivalNumber  Float   // computed: sum of non-negotiable / 4.33
+
+  updatedAt       DateTime @updatedAt
+}
+
+model IncomeEntry {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+
+  amount      Float
+  weekOf      DateTime // start of the week this income belongs to
+  source      String   // "doordash" | "uber" | "freelance" etc.
+  note        String?
+
+  createdAt   DateTime @default(now())
+}
+
+model InsurancePolicy {
+  id              String   @id @default(uuid())
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id])
+
+  fileName        String
+  fileUrl         String   // Supabase Storage URL
+  extractedText   String   // raw PDF text (used for AI calls)
+
+  // AI-generated summary (stored so we don't re-call Claude on every load)
+  covered         String[] // plain-English covered items
+  notCovered      String[] // plain-English NOT covered items
+  deductible      String
+  limits          String
+  renewalDate     String
+
+  // Quiz
+  quizQuestions   Json?    // array of generated questions
+  lastQuizScore   Int?
+  lastQuizDate    DateTime?
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}

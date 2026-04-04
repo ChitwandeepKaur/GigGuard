@@ -1,6 +1,8 @@
 # GigGuard — Tech Stack
 
-## Stack Overview
+## Overview
+
+### Frontend (client/)
 
 | Layer | Technology | Version |
 |---|---|---|
@@ -11,147 +13,285 @@
 | Routing | React Router | 6 |
 | Charts | Recharts | 2 |
 | Icons | Lucide React | latest |
-| AI / LLM | Anthropic Claude API | claude-sonnet-4-20250514 |
+| HTTP client | Native fetch via api/index.js | — |
+
+### Backend (server/)
+
+| Layer | Technology | Version |
+|---|---|---|
+| Runtime | Node.js | 18+ |
+| Framework | Express | 4 |
+| ORM | Prisma | 5 |
+| Database | PostgreSQL via Supabase | — |
+| Auth | Supabase Auth (JWT) | — |
+| File storage | Supabase Storage | — |
+| AI | Anthropic Claude SDK | latest |
 | PDF parsing | pdfjs-dist | 4 |
-| Income data | Manual input (Plaid as roadmap) | — |
-| Hosting | Vercel | — |
-| Package manager | npm | — |
+| File uploads | Multer | — |
+
+### Hosting
+
+| Service | Platform |
+|---|---|
+| Frontend | Vercel |
+| Backend | Railway |
+| Database + Auth + Storage | Supabase (free tier) |
 
 ---
 
 ## Project Setup
 
+### Full monorepo structure
+
+```
+GigGuard/
+├── client/
+│   ├── src/
+│   │   ├── api/
+│   │   │   └── index.js              # All fetch calls to the backend
+│   │   ├── components/
+│   │   │   ├── chatbot/
+│   │   │   │   ├── ChatbotButton.jsx
+│   │   │   │   ├── ChatbotPanel.jsx
+│   │   │   │   └── ChatMessage.jsx
+│   │   │   ├── dashboard/
+│   │   │   │   ├── SafeToSpend.jsx
+│   │   │   │   ├── BufferHealth.jsx
+│   │   │   │   ├── TaxTracker.jsx
+│   │   │   │   └── WindfallAlert.jsx
+│   │   │   ├── insurance/
+│   │   │   │   ├── InsuranceRecommendation.jsx
+│   │   │   │   ├── PDFUpload.jsx
+│   │   │   │   ├── PolicySummary.jsx
+│   │   │   │   └── QuizGame.jsx
+│   │   │   ├── onboarding/
+│   │   │   │   ├── IncomeProfiler.jsx
+│   │   │   │   ├── ExpenseSetup.jsx
+│   │   │   │   └── InsuranceStep.jsx
+│   │   │   ├── survival/
+│   │   │   │   ├── SurvivalBanner.jsx
+│   │   │   │   ├── SurvivalPlans.jsx
+│   │   │   │   ├── ShockEventPlanner.jsx
+│   │   │   │   └── RecoveryPlan.jsx
+│   │   │   └── ui/
+│   │   │       ├── Card.jsx
+│   │   │       ├── Button.jsx
+│   │   │       ├── Badge.jsx
+│   │   │       └── ProgressBar.jsx
+│   │   ├── pages/
+│   │   │   ├── Landing.jsx
+│   │   │   ├── Onboarding.jsx
+│   │   │   ├── Dashboard.jsx
+│   │   │   └── InsuranceHub.jsx
+│   │   ├── store/
+│   │   │   ├── useUserStore.js       # Auth + profile (synced from backend)
+│   │   │   ├── useFinanceStore.js    # Dashboard data (fetched from backend)
+│   │   │   └── useInsuranceStore.js  # Policy + quiz state
+│   │   ├── data/
+│   │   │   └── demoUser.js           # Pre-filled demo profile for judges
+│   │   ├── App.jsx
+│   │   ├── main.jsx
+│   │   └── index.css
+│   ├── .env
+│   ├── tailwind.config.js
+│   └── vite.config.js
+│
+└── server/
+    ├── src/
+    │   ├── routes/
+    │   │   ├── auth.js
+    │   │   ├── user.js
+    │   │   ├── finance.js
+    │   │   ├── insurance.js
+    │   │   └── ai.js
+    │   ├── middleware/
+    │   │   ├── auth.js
+    │   │   └── errorHandler.js
+    │   ├── services/
+    │   │   ├── claude.js             # All Anthropic API calls
+    │   │   ├── pdfParser.js          # PDF text extraction
+    │   │   └── calculations.js       # All financial math
+    │   ├── prisma/
+    │   │   └── schema.prisma
+    │   └── index.js
+    ├── .env
+    └── package.json
+```
+
+---
+
+## Install Commands
+
+### Frontend
+
 ```bash
-npm create vite@latest gigshield -- --template react
-cd gigshield
-npm install
-
-# Core dependencies
+cd client
+npm create vite@latest . -- --template react
 npm install react-router-dom zustand recharts lucide-react
-
-# Tailwind
 npm install -D tailwindcss postcss autoprefixer
 npx tailwindcss init -p
+```
 
-# PDF parsing
-npm install pdfjs-dist
+### Backend
 
-# HTTP client (for Claude API calls)
-npm install axios
+```bash
+cd server
+npm init -y
+npm install express cors dotenv prisma @prisma/client @supabase/supabase-js \
+            @anthropic-ai/sdk multer pdfjs-dist
+npx prisma init
 ```
 
 ---
 
 ## Environment Variables
 
-Create `.env` in project root:
+### client/.env
 
 ```env
-VITE_ANTHROPIC_API_KEY=your_key_here
+VITE_API_URL=http://localhost:3001
+VITE_SUPABASE_URL=https://xxx.supabase.co
+VITE_SUPABASE_ANON_KEY=eyJ...
 ```
 
-In code:
-```js
-const apiKey = import.meta.env.VITE_ANTHROPIC_API_KEY
-```
+### server/.env
 
-**Important:** For a hackathon, calling Claude API directly from the browser is fine. In production you would proxy through a backend to protect the key.
-
----
-
-## Folder Structure
-
-```
-gigshield/
-├── public/
-├── src/
-│   ├── api/
-│   │   └── claude.js          # All Claude API calls
-│   ├── components/
-│   │   ├── chatbot/
-│   │   │   ├── ChatbotButton.jsx
-│   │   │   ├── ChatbotPanel.jsx
-│   │   │   └── ChatMessage.jsx
-│   │   ├── dashboard/
-│   │   │   ├── SafeToSpend.jsx
-│   │   │   ├── BufferHealth.jsx
-│   │   │   ├── TaxTracker.jsx
-│   │   │   └── WindfallAlert.jsx
-│   │   ├── insurance/
-│   │   │   ├── InsuranceRecommendation.jsx
-│   │   │   ├── PDFUpload.jsx
-│   │   │   ├── PolicySummary.jsx
-│   │   │   └── QuizGame.jsx
-│   │   ├── onboarding/
-│   │   │   ├── IncomeProfiler.jsx
-│   │   │   ├── ExpenseSetup.jsx
-│   │   │   └── InsuranceStep.jsx
-│   │   ├── survival/
-│   │   │   ├── SurvivalBanner.jsx
-│   │   │   ├── SurvivalPlans.jsx
-│   │   │   ├── ShockEventPlanner.jsx
-│   │   │   └── RecoveryPlan.jsx
-│   │   └── ui/
-│   │       ├── Card.jsx
-│   │       ├── Button.jsx
-│   │       ├── Badge.jsx
-│   │       ├── ProgressBar.jsx
-│   │       └── StateBadge.jsx
-│   ├── pages/
-│   │   ├── Landing.jsx
-│   │   ├── Onboarding.jsx
-│   │   ├── Dashboard.jsx
-│   │   └── InsuranceHub.jsx
-│   ├── store/
-│   │   ├── useUserStore.js     # Profile, income, expenses
-│   │   ├── useFinanceStore.js  # Calculations, safe-to-spend
-│   │   └── useInsuranceStore.js # PDF text, quiz state
-│   ├── utils/
-│   │   ├── calculations.js     # All financial math
-│   │   └── pdfParser.js        # PDF text extraction
-│   ├── App.jsx
-│   ├── main.jsx
-│   └── index.css
-├── .env
-├── tailwind.config.js
-└── vite.config.js
+```env
+DATABASE_URL=postgresql://...
+SUPABASE_URL=https://xxx.supabase.co
+SUPABASE_SERVICE_KEY=eyJ...
+ANTHROPIC_API_KEY=sk-ant-...
+CLIENT_URL=http://localhost:5173
+PORT=3001
 ```
 
 ---
 
 ## Key Code Patterns
 
-### Zustand Store (User Profile)
+### Client API Layer
+
+The frontend never calls Claude or Supabase directly.
+Everything goes through one file — never fetch inside components.
 
 ```js
-// src/store/useUserStore.js
+// client/src/api/index.js
+const BASE = import.meta.env.VITE_API_URL
+
+async function request(path, options = {}) {
+  const token = localStorage.getItem('GigGuard_token')
+  const res = await fetch(`${BASE}${path}`, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...options.headers
+    }
+  })
+  if (!res.ok) throw new Error(await res.text())
+  return res.json()
+}
+
+export const api = {
+  auth: {
+    login: (email, password) =>
+      request('/api/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) }),
+    register: (email, password) =>
+      request('/api/auth/register', { method: 'POST', body: JSON.stringify({ email, password }) }),
+    me: () => request('/api/auth/me')
+  },
+  user: {
+    getProfile: () => request('/api/user/profile'),
+    createProfile: (data) =>
+      request('/api/user/profile', { method: 'POST', body: JSON.stringify(data) }),
+    updateProfile: (data) =>
+      request('/api/user/profile', { method: 'PUT', body: JSON.stringify(data) }),
+    getDashboard: () => request('/api/user/dashboard')
+  },
+  finance: {
+    getSummary: () => request('/api/finance/summary'),
+    logIncome: (data) =>
+      request('/api/finance/income', { method: 'POST', body: JSON.stringify(data) }),
+    getIncome: () => request('/api/finance/income')
+  },
+  insurance: {
+    getPolicy: () => request('/api/insurance/policy'),
+    uploadPDF: (formData) =>
+      request('/api/insurance/upload', { method: 'POST', body: formData, headers: {} }),
+    getQuiz: () => request('/api/insurance/quiz'),
+    generateQuiz: () =>
+      request('/api/insurance/quiz/generate', { method: 'POST' }),
+    saveScore: (score) =>
+      request('/api/insurance/quiz/score', { method: 'POST', body: JSON.stringify({ score }) }),
+    getRecommendation: () => request('/api/insurance/recommendation')
+  },
+  ai: {
+    chat: (messages) =>
+      request('/api/ai/chat', { method: 'POST', body: JSON.stringify({ messages }) })
+  }
+}
+```
+
+### Zustand Stores (Client State)
+
+Stores hold UI state and cache from backend. On mount, components call the api.* functions and hydrate the stores.
+
+```js
+// client/src/store/useUserStore.js
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
 export const useUserStore = create(persist(
   (set) => ({
-    gigType: [],
-    incomeFrequency: '',
-    weeklyLow: 0,
-    weeklyHigh: 0,
-    worstWeek: 0,
-    bestWeek: 0,
-    expenses: {
-      nonNegotiable: {},
-      semiFlexible: {},
-      fullyFlexible: {}
+    token: null,
+    user: null,
+    profile: null,
+    setToken: (token) => {
+      localStorage.setItem('GigGuard_token', token)
+      set({ token })
     },
-    setIncomeProfile: (data) => set(data),
-    setExpenses: (expenses) => set({ expenses }),
+    setUser: (user) => set({ user }),
+    setProfile: (profile) => set({ profile }),
+    logout: () => {
+      localStorage.removeItem('GigGuard_token')
+      set({ token: null, user: null, profile: null })
+    }
   }),
-  { name: 'gigshield-user' }
+  { name: 'GigGuard-user' }
 ))
+
+// client/src/store/useFinanceStore.js
+export const useFinanceStore = create((set) => ({
+  safeToSpend: null,
+  safeToSpendState: 'safe',
+  bufferWeeks: 0,
+  taxReserve: 0,
+  totalTaxOwed: 0,
+  windfall: null,
+  isSurvivalMode: false,
+  recentIncome: [],
+  setSummary: (data) => set(data),
+  addIncome: (entry) => set((s) => ({ recentIncome: [entry, ...s.recentIncome] }))
+}))
+
+// client/src/store/useInsuranceStore.js
+export const useInsuranceStore = create((set) => ({
+  policy: null,
+  quizQuestions: [],
+  lastScore: null,
+  setPolicy: (policy) => set({ policy }),
+  setQuiz: (questions) => set({ quizQuestions: questions }),
+  setScore: (score) => set({ lastScore: score })
+}))
 ```
 
-### Financial Calculations
+### Financial Calculations (Server)
+
+All math lives server-side in services/calculations.js.
+These are the same functions as before, just running on the server now.
 
 ```js
-// src/utils/calculations.js
+// server/src/services/calculations.js
 
 export function calcFloorIncome(worstWeek) {
   return worstWeek
@@ -172,17 +312,10 @@ export function calcWeeklySurvivalNumber(nonNegotiableExpenses) {
 }
 
 export function calcSEtaxReserve(weeklyIncome) {
-  return weeklyIncome * 0.153 * 0.9 // 15.3% SE tax, 90% net
+  return weeklyIncome * 0.153 * 0.9
 }
 
-export function calcSafeToSpend({
-  availableCash,
-  billsDueThisWeek,
-  emergencyBufferTarget,
-  currentBuffer,
-  weeklyTaxReserve,
-  volatilityScore
-}) {
+export function calcSafeToSpend({ availableCash, billsDueThisWeek, emergencyBufferTarget, currentBuffer, weeklyTaxReserve, volatilityScore }) {
   const bufferGap = Math.max(0, emergencyBufferTarget - currentBuffer)
   const volatilityCushion = availableCash * (volatilityScore / 1000)
   return availableCash - billsDueThisWeek - bufferGap - weeklyTaxReserve - volatilityCushion
@@ -195,9 +328,8 @@ export function getSafeToSpendState(safeAmount, survivalNumber, avgFlexible) {
   return 'danger'
 }
 
-export function calcBufferWeeks(currentBuffer, floorIncome, survivalNumber) {
-  const weeklyNeed = survivalNumber
-  return currentBuffer / weeklyNeed
+export function calcBufferWeeks(currentBuffer, survivalNumber) {
+  return currentBuffer / survivalNumber
 }
 
 export function calcWindfall(currentWeekIncome, goodWeekThreshold) {
@@ -213,106 +345,82 @@ export function calcWindfall(currentWeekIncome, goodWeekThreshold) {
 }
 ```
 
-### Claude API Helper
+### Claude Service (Server)
 
 ```js
-// src/api/claude.js
+// server/src/services/claude.js
+import Anthropic from '@anthropic-ai/sdk'
 
-const API_URL = 'https://api.anthropic.com/v1/messages'
+const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 const MODEL = 'claude-sonnet-4-20250514'
 
-export async function callClaude(systemPrompt, userMessage) {
-  const response = await fetch(API_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': import.meta.env.VITE_ANTHROPIC_API_KEY,
-      'anthropic-version': '2023-06-01',
-      'anthropic-dangerous-direct-browser-access': 'true'
-    },
-    body: JSON.stringify({
-      model: MODEL,
-      max_tokens: 1000,
-      system: systemPrompt,
-      messages: [{ role: 'user', content: userMessage }]
-    })
-  })
-  const data = await response.json()
-  return data.content[0].text
-}
-
 export async function summarizePolicy(pdfText) {
-  const system = `You are a financial advisor helping gig workers understand their insurance policy.
-  Extract and summarize in plain English. Return JSON only with keys:
-  covered (array of strings), not_covered (array of strings), deductible (string), limits (string), renewal_date (string).
-  No markdown, no preamble.`
-  return JSON.parse(await callClaude(system, `Summarize this policy:\n\n${pdfText.slice(0, 8000)}`))
+  const response = await anthropic.messages.create({
+    model: MODEL,
+    max_tokens: 1000,
+    system: `You are a financial advisor helping gig workers understand their insurance.
+Extract and summarize in plain English. Return JSON only with these exact keys:
+covered (string array), not_covered (string array), deductible (string), limits (string), renewal_date (string).
+No markdown, no preamble, no trailing text.`,
+    messages: [{ role: 'user', content: `Summarize this policy:\n\n${pdfText.slice(0, 8000)}` }]
+  })
+  return JSON.parse(response.content[0].text)
 }
 
 export async function generateQuizQuestions(pdfText, gigType) {
-  const system = `You are creating a quiz to help a ${gigType} worker understand their insurance.
-  Generate exactly 5 scenario questions based on the policy text.
-  Return JSON array only. Each item: { scenario, answer ("covered"|"not_covered"|"partial"), clause, explanation }.
-  No markdown, no preamble.`
-  return JSON.parse(await callClaude(system, `Policy text:\n\n${pdfText.slice(0, 8000)}`))
-}
-
-export async function chatWithContext(messages, pdfText, userProfile) {
-  const system = `You are GigShield's financial coach helping a gig worker.
-  User profile: ${JSON.stringify(userProfile)}
-  ${pdfText ? `Insurance policy on file:\n${pdfText.slice(0, 4000)}` : ''}
-  Answer questions about their finances and insurance in plain English. Be direct and specific.
-  Never use financial jargon. Keep responses under 150 words.`
-
-  const response = await fetch(API_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': import.meta.env.VITE_ANTHROPIC_API_KEY,
-      'anthropic-version': '2023-06-01',
-      'anthropic-dangerous-direct-browser-access': 'true'
-    },
-    body: JSON.stringify({
-      model: MODEL,
-      max_tokens: 300,
-      system,
-      messages
-    })
+  const response = await anthropic.messages.create({
+    model: MODEL,
+    max_tokens: 1000,
+    system: `You are creating a quiz to help a ${gigType} worker understand their insurance.
+Generate exactly 5 scenario questions based on the policy text.
+Return JSON array only. Each item: { scenario, answer ("covered"|"not_covered"|"partial"), clause, explanation }.
+No markdown, no preamble.`,
+    messages: [{ role: 'user', content: `Policy text:\n\n${pdfText.slice(0, 8000)}` }]
   })
-  const data = await response.json()
-  return data.content[0].text
+  return JSON.parse(response.content[0].text)
 }
 
 export async function getInsuranceRecommendation(userProfile) {
-  const system = `You are a State Farm insurance advisor.
-  Based on the user's gig work profile, recommend exactly 3 insurance products.
-  Return JSON array only. Each item: { product, reason, priority ("high"|"medium"|"low"), gap_description }.
-  No markdown, no preamble.`
-  return JSON.parse(await callClaude(system, `User profile:\n${JSON.stringify(userProfile)}`))
+  const response = await anthropic.messages.create({
+    model: MODEL,
+    max_tokens: 800,
+    system: `You are a State Farm insurance advisor.
+Based on the user's gig work profile, recommend exactly 3 insurance products.
+Return JSON array only. Each item: { product, reason, priority ("high"|"medium"|"low"), gap_description }.
+No markdown, no preamble.`,
+    messages: [{ role: 'user', content: `User profile:\n${JSON.stringify(userProfile)}` }]
+  })
+  return JSON.parse(response.content[0].text)
+}
+
+export async function chatWithContext(messages, userProfile, policyText) {
+  const response = await anthropic.messages.create({
+    model: MODEL,
+    max_tokens: 300,
+    system: `You are GigGuard's financial coach for a gig worker.
+Profile: ${JSON.stringify(userProfile)}
+${policyText ? `Insurance policy on file:\n${policyText.slice(0, 4000)}` : ''}
+Be direct, plain English, under 150 words per response. No jargon.`,
+    messages
+  })
+  return response.content[0].text
 }
 ```
 
-### PDF Parser
+### PDF Parser (Server)
 
 ```js
-// src/utils/pdfParser.js
-import * as pdfjsLib from 'pdfjs-dist'
+// server/src/services/pdfParser.js
+import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf.js'
 
-pdfjsLib.GlobalWorkerOptions.workerSrc = 
-  `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.worker.min.js`
-
-export async function extractPDFText(file) {
-  const arrayBuffer = await file.arrayBuffer()
-  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise
+export async function extractPDFText(buffer) {
+  const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(buffer) }).promise
   let fullText = ''
-
   for (let i = 1; i <= pdf.numPages; i++) {
     const page = await pdf.getPage(i)
-    const textContent = await page.getTextContent()
-    const pageText = textContent.items.map(item => item.str).join(' ')
-    fullText += pageText + '\n'
+    const content = await page.getTextContent()
+    fullText += content.items.map(item => item.str).join(' ') + '\n'
   }
-
   return fullText
 }
 ```
@@ -322,22 +430,28 @@ export async function extractPDFText(file) {
 ## React Router Setup
 
 ```jsx
-// src/App.jsx
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+// client/src/App.jsx
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { useUserStore } from './store/useUserStore'
 import Landing from './pages/Landing'
 import Onboarding from './pages/Onboarding'
 import Dashboard from './pages/Dashboard'
 import InsuranceHub from './pages/InsuranceHub'
 import ChatbotButton from './components/chatbot/ChatbotButton'
 
+function ProtectedRoute({ children }) {
+  const token = useUserStore(s => s.token)
+  return token ? children : <Navigate to="/" replace />
+}
+
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Landing />} />
-        <Route path="/onboarding" element={<Onboarding />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/insurance" element={<InsuranceHub />} />
+        <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
+        <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+        <Route path="/insurance" element={<ProtectedRoute><InsuranceHub /></ProtectedRoute>} />
       </Routes>
       <ChatbotButton />
     </BrowserRouter>
@@ -350,42 +464,23 @@ export default function App() {
 ## Tailwind Config
 
 ```js
-// tailwind.config.js
+// client/tailwind.config.js
 export default {
   content: ['./index.html', './src/**/*.{js,jsx}'],
   theme: {
     extend: {
       colors: {
-        brand: {
-          DEFAULT: '#0F6E56',
-          light: '#1D9E75',
-          surface: '#E1F5EE',
-        },
-        warn: {
-          DEFAULT: '#EF9F27',
-          surface: '#FAEEDA',
-        },
-        danger: {
-          DEFAULT: '#D85A30',
-          surface: '#FAECE7',
-        },
-        app: {
-          bg: '#F8F7F2',
-          card: '#FFFFFF',
-          border: '#D3D1C7',
-          text: '#2C2C2A',
-          muted: '#5F5E5A',
-        }
+        brand: { DEFAULT: '#0F6E56', light: '#1D9E75', surface: '#E1F5EE' },
+        warn: { DEFAULT: '#EF9F27', surface: '#FAEEDA' },
+        danger: { DEFAULT: '#D85A30', surface: '#FAECE7' },
+        app: { bg: '#F8F7F2', card: '#FFFFFF', border: '#D3D1C7', text: '#2C2C2A', muted: '#5F5E5A' }
       },
       fontFamily: {
         display: ['Syne', 'sans-serif'],
         body: ['DM Sans', 'sans-serif'],
         mono: ['DM Mono', 'monospace'],
       },
-      borderRadius: {
-        card: '12px',
-        hero: '16px',
-      }
+      borderRadius: { card: '12px', hero: '16px' }
     }
   }
 }
@@ -395,25 +490,57 @@ export default {
 
 ## Deployment
 
+### Backend → Railway
+
 ```bash
-# Install Vercel CLI
-npm i -g vercel
-
-# Deploy
-vercel
-
-# Set environment variable in Vercel dashboard:
-# VITE_ANTHROPIC_API_KEY = your_key
+cd server
+npm install -g @railway/cli
+railway login
+railway init
+railway up
+# Add all server/.env vars in Railway dashboard
 ```
 
-One command, live URL in 60 seconds.
+### Frontend → Vercel
+
+```bash
+cd client
+vercel
+# In Vercel dashboard, set:
+# VITE_API_URL = your Railway backend URL
+# VITE_SUPABASE_URL = your Supabase URL
+# VITE_SUPABASE_ANON_KEY = your Supabase anon key
+```
 
 ---
 
-## Hackathon Tips
+## Demo Safety Net
 
-- Build onboarding first — everything downstream depends on the user profile data
-- Use hardcoded demo data as fallback so the demo never breaks
-- Keep a `src/data/demoUser.js` with a pre-filled profile for the demo
-- Test the Claude API calls early — PDF parsing + Claude is the highest-risk integration
-- The chatbot is the easiest thing to build last and has the highest visual wow factor for judges
+Always keep a working demo mode. In `client/src/data/demoUser.js`:
+
+```js
+export const demoUser = {
+  token: 'demo',
+  profile: {
+    gigTypes: ['rideshare', 'delivery'],
+    incomeFrequency: 'weekly',
+    weeklyLow: 800,
+    weeklyHigh: 1800,
+    worstWeek: 620,
+    bestWeek: 2100,
+    floorIncome: 620,
+    averageIncome: 1300,
+    volatilityScore: 76.9
+  },
+  finance: {
+    safeToSpend: 340,
+    safeToSpendState: 'warning',
+    bufferWeeks: 1.7,
+    taxReserve: 87,
+    totalTaxOwed: 412,
+    isSurvivalMode: false
+  }
+}
+```
+
+Load this in Landing.jsx with a "Load demo" button. If the backend is down during the demo, the app still works.
