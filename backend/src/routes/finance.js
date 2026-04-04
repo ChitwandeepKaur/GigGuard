@@ -1,6 +1,6 @@
 import express from 'express';
 import { PrismaClient } from '@prisma/client';
-import { calcSafeToSpend, calcBufferWeeks, calcSEtaxReserve, calcWindfall, getSafeToSpendState } from '../services/calculations.js';
+import { calcSafeToSpend, calcBufferWeeks, calcSEtaxReserve, calcWindfall, getSafeToSpendState, getNextTaxDeadline, getBufferTier, calcTaxPenalty } from '../services/calculations.js';
 
 const prisma = new PrismaClient();
 const router = express.Router();
@@ -80,27 +80,42 @@ router.get('/summary', async (req, res, next) => {
 
     const taxReserve = calcSEtaxReserve(thisWeekIncome);
     
-    // Based on available dummy/mock state since some values like available cash are complex
+    const billsDueThisWeek = expenses.survival_number; // Approximation
+    const emergencyBufferTarget = expenses.survival_number * 3;
+    const avgFlexible = 150; // Default demo value
+
     const safeToSpend = calcSafeToSpend({
-      availableCash: thisWeekIncome,
-      billsDueThisWeek: expenses.survival_number,
-      emergencyBufferTarget: expenses.survival_number * 3,
-      currentBuffer: 0,
+      availableCash: profile.available_cash,
+      billsDueThisWeek: billsDueThisWeek,
+      emergencyBufferTarget: emergencyBufferTarget,
+      currentBuffer: profile.current_buffer,
       weeklyTaxReserve: taxReserve,
       volatilityScore: profile.volatility_score
     });
 
-    const bufferWeeks = calcBufferWeeks(0, expenses.survival_number);
+    const bufferWeeks = calcBufferWeeks(profile.current_buffer, expenses.survival_number);
     const windfall = thisWeekIncome > profile.best_week
       ? calcWindfall(thisWeekIncome, profile.best_week) : null;
 
+    const totalTaxOwed = recentIncome.reduce((s, e) => s + (e.amount * 0.153 * 0.9), 0);
+    const nextDeadline = getNextTaxDeadline();
+
     res.json({
       safeToSpend,
-      safeToSpendState: getSafeToSpendState(safeToSpend, expenses.survival_number, 150),
+      safeToSpendState: getSafeToSpendState(safeToSpend, expenses.survival_number, avgFlexible),
+      availableCash: profile.available_cash,
+      currentBuffer: profile.current_buffer,
       bufferWeeks,
+      bufferTier: getBufferTier(bufferWeeks),
+      emergencyBufferTarget,
+      billsDueThisWeek,
       taxReserve,
-      totalTaxOwed: recentIncome.reduce((s, e) => s + (e.amount * 0.153 * 0.9), 0),
+      totalTaxOwed,
+      estimatedPenalty: calcTaxPenalty(totalTaxOwed, 0), // 0 days overdue for demo
+      nextTaxDeadline: nextDeadline,
       windfall,
+      goodWeekThreshold: profile.best_week,
+      thisWeekIncome,
       isSurvivalMode: thisWeekIncome < profile.floor_income,
       recentIncome
     });

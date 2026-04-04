@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import api from '../services/api';
 import { useStore } from '../store';
 import { Upload, FileText, CheckCircle, Loader2, ShieldCheck, XCircle, DollarSign, Calendar, Target } from 'lucide-react';

@@ -17,6 +17,7 @@ export function calcWeeklySurvivalNumber(nonNegotiableExpenses) {
 }
 
 export function calcSEtaxReserve(weeklyIncome) {
+  // 15.3% of net earnings (approximated on weekly income)
   return weeklyIncome * 0.153 * 0.9
 }
 
@@ -26,15 +27,42 @@ export function calcSafeToSpend({ availableCash, billsDueThisWeek, emergencyBuff
   return availableCash - billsDueThisWeek - bufferGap - weeklyTaxReserve - volatilityCushion
 }
 
-export function getSafeToSpendState(safeAmount, survivalNumber, avgFlexible) {
-  if (safeAmount > avgFlexible) return 'safe'
-  if (safeAmount > 0) return 'warning'
-  if (safeAmount > -survivalNumber) return 'risky'
-  return 'danger'
+export function getSafeToSpendState(safeAmount, survivalNumber, avgFlexible = 150) {
+  if (safeAmount > avgFlexible) return 'safe' // Confidently safe (Teal)
+  if (safeAmount > 0) return 'warning'         // Safe if income arrives (Amber)
+  if (safeAmount > -survivalNumber) return 'risky' // Risky (Orange)
+  return 'danger'                             // Overspending danger (Red)
 }
 
 export function calcBufferWeeks(currentBuffer, survivalNumber) {
+  if (survivalNumber <= 0) return 3 // default to "protected" if no expenses
   return currentBuffer / survivalNumber
+}
+
+export function getBufferTier(weeks) {
+  if (weeks < 1) return 'vulnerable'
+  if (weeks < 3) return 'building'
+  return 'protected'
+}
+
+export function calcTaxPenalty(totalOwed, overdueDays = 0) {
+  // simple 0.5% per month penalty approximation for demo
+  if (overdueDays <= 0) return 0
+  const months = Math.ceil(overdueDays / 30)
+  return totalOwed * 0.005 * months
+}
+
+export function getNextTaxDeadline() {
+  const now = new Date()
+  const year = now.getFullYear()
+  const deadlines = [
+    new Date(year, 0, 15), // Jan 15 (last year Q4)
+    new Date(year, 3, 15), // Apr 15
+    new Date(year, 5, 15), // Jun 15
+    new Date(year, 8, 15), // Sep 15
+    new Date(year + 1, 0, 15), // Jan 15 (next year Q4)
+  ]
+  return deadlines.find(d => d > now) || deadlines[0]
 }
 
 export function calcWindfall(currentWeekIncome, goodWeekThreshold) {
