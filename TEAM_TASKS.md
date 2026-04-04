@@ -133,15 +133,15 @@ Then together:
 **Owns:** The entire Express server, all AI features, and the Insurance Hub.
 
 ### Hour 1–2 (during shared setup): Server foundation
-- [ ] Create Supabase project, share credentials with team
-- [ ] Paste Prisma schema (from BACKEND.md) into `server/src/prisma/schema.prisma`
-- [ ] Run `npx prisma db push` and `npx prisma generate`
-- [ ] Build `server/src/index.js` — Express app, CORS, middleware, route registration (copy from BACKEND.md)
-- [ ] Build `server/src/middleware/auth.js` — Supabase JWT verification (copy from BACKEND.md)
-- [ ] Build `server/src/middleware/errorHandler.js` — global error handler
-- [ ] Build `server/src/routes/auth.js` — register, login, logout, me
-- [ ] Build `server/src/routes/user.js` — profile CRUD, dashboard endpoint
-- [ ] Confirm auth flow works: register → login → get JWT → call protected route
+- [x] Create Supabase project, share credentials with team
+- [x] Paste Prisma schema (from BACKEND.md) into `server/src/prisma/schema.prisma`
+- [x] Run `npx prisma db push` and `npx prisma generate`
+- [x] Build `server/src/index.js` — Express app, CORS, middleware, route registration (copy from BACKEND.md)
+- [x] Build `server/src/middleware/auth.js` — Supabase JWT verification (copy from BACKEND.md)
+- [x] Build `server/src/middleware/errorHandler.js` — global error handler
+- [x] Build `server/src/routes/auth.js` — register, login, logout, me
+- [x] Build `server/src/routes/user.js` — profile CRUD, dashboard endpoint
+- [x] Confirm auth flow works: register → login → get JWT → call protected route
 
 ### Hour 3–5: Claude services + Insurance routes
 - [ ] Build `server/src/services/claude.js` — all 4 Claude functions (copy from TECH_STACK.md):
