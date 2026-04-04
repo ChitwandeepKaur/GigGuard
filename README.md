@@ -38,10 +38,10 @@ It solves three problems no other app addresses:
 ## Architecture
 
 ```
-client/   → React + Vite (frontend)
-server/   → Express + Prisma (backend API)
-          → Supabase (PostgreSQL + Auth + File Storage)
-          → Anthropic Claude API (AI features, proxied server-side)
+frontend/ -> React + Vite (frontend)
+backend/  -> Express + Prisma (backend API)
+          -> Supabase (PostgreSQL + Auth + File Storage)
+          -> Google Gemini API (AI features, proxied server-side)
 ```
 
 The frontend never touches the Claude API or database directly. All sensitive operations go through the Express backend.
@@ -77,7 +77,7 @@ The frontend never touches the Claude API or database directly. All sensitive op
 ### Prerequisites
 - Node.js 18+
 - A Supabase project (free at supabase.com)
-- An Anthropic API key
+- A Google Gemini API key
 
 ### 1. Clone and install
 
@@ -85,8 +85,8 @@ The frontend never touches the Claude API or database directly. All sensitive op
 git clone https://github.com/your-team/GigGuard
 cd GigGuard
 
-cd client && npm install
-cd ../server && npm install
+cd frontend && npm install
+cd ../backend && npm install
 ```
 
 ### 2. Set up Supabase
@@ -95,17 +95,16 @@ cd ../server && npm install
 
 ### 3. Configure environment variables
 
-server/.env
+backend/.env
 ```
 DATABASE_URL=postgresql://...
 SUPABASE_URL=https://xxx.supabase.co
 SUPABASE_SERVICE_KEY=eyJ...
-ANTHROPIC_API_KEY=sk-ant-...
-CLIENT_URL=http://localhost:5173
+GEMINI_API_KEY=your_gemini_api_key_here
 PORT=3001
 ```
 
-client/.env
+frontend/.env
 ```
 VITE_API_URL=http://localhost:3001
 VITE_SUPABASE_URL=https://xxx.supabase.co
@@ -115,7 +114,7 @@ VITE_SUPABASE_ANON_KEY=eyJ...
 ### 4. Set up database
 
 ```bash
-cd server
+cd backend
 npx prisma db push
 npx prisma generate
 ```
@@ -124,10 +123,10 @@ npx prisma generate
 
 ```bash
 # Terminal 1 — backend
-cd server && node src/index.js
+cd backend && npm run dev
 
 # Terminal 2 — frontend
-cd client && npm run dev
+cd frontend && npm run dev
 ```
 
 App runs at http://localhost:5173
@@ -144,10 +143,10 @@ Click "Load Demo" on the landing page to pre-fill a realistic gig worker profile
 
 ```bash
 # Backend → Railway
-cd server && railway up
+cd backend && railway up
 
 # Frontend → Vercel
-cd client && vercel
+cd frontend && vercel
 # Set VITE_API_URL to your Railway backend URL in Vercel dashboard
 ```
 

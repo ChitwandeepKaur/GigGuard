@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useStore } from '../store';
-import { Upload, FileText, CheckCircle, Loader2 } from 'lucide-react';
+import { Upload, FileText, CheckCircle, Loader2, ShieldCheck, XCircle, DollarSign, Calendar, Target } from 'lucide-react';
 
 export default function InsuranceHub() {
-  const { setPolicyText, policyText } = useStore();
+  const { setPolicyText, policyText, policySummary, setPolicySummary } = useStore();
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -19,13 +19,15 @@ export default function InsuranceHub() {
     formData.append('policyFile', file);
     
     try {
-      const res = await axios.post('http://localhost:3001/api/ai/upload-policy', formData, {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+      const res = await axios.post(`${apiUrl}/api/ai/upload-policy`, formData, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token') || 'test-token'}`,
           'Content-Type': 'multipart/form-data'
         }
       });
       setPolicyText(res.data.extractedText);
+      setPolicySummary(res.data.summary);
     } catch (err) {
       console.error(err);
       setError('Failed to process policy document');
@@ -47,15 +49,108 @@ export default function InsuranceHub() {
           Your Policy Document
         </h3>
         
-        {policyText ? (
+        {policyText && policySummary ? (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between pb-4 border-b border-border">
+               <div>
+                 <h4 className="text-lg font-medium text-app-text flex items-center gap-2">
+                   Plain-English Digest
+                 </h4>
+                 <p className="text-sm text-app-muted mt-1">Here is exactly what your uploaded policy covers and what it does not.</p>
+               </div>
+               <button 
+                onClick={() => { setPolicyText(''); setPolicySummary(null); }}
+                className="text-sm px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-lg transition-colors font-medium border border-red-500/20"
+              >
+                Upload Different Policy
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+               {/* Covered Card */}
+               <div className="bg-green-500/5 border border-green-500/20 rounded-2xl p-6">
+                  <div className="flex items-center gap-3 mb-4 text-green-500">
+                    <ShieldCheck size={28} />
+                    <h5 className="font-semibold text-lg">What IS Covered</h5>
+                  </div>
+                  <ul className="space-y-3">
+                    {policySummary.isCovered?.map((item, i) => (
+                       <li key={i} className="flex items-start gap-2 text-sm text-app-text">
+                         <span className="text-green-500 mt-0.5">•</span>
+                         <span className="leading-relaxed">{item}</span>
+                       </li>
+                    ))}
+                    {(!policySummary.isCovered || policySummary.isCovered.length === 0) && (
+                       <li className="text-sm text-app-muted italic">No covered items extracted.</li>
+                    )}
+                  </ul>
+               </div>
+
+               {/* Not Covered Card */}
+               <div className="bg-red-500/5 border border-red-500/20 rounded-2xl p-6">
+                  <div className="flex items-center gap-3 mb-4 text-red-500">
+                    <XCircle size={28} />
+                    <h5 className="font-semibold text-lg">What is NOT Covered</h5>
+                  </div>
+                  <ul className="space-y-3">
+                    {policySummary.notCovered?.map((item, i) => (
+                       <li key={i} className="flex items-start gap-2 text-sm text-app-text">
+                         <span className="text-red-500 mt-0.5">•</span>
+                         <span className="leading-relaxed">{item}</span>
+                       </li>
+                    ))}
+                    {(!policySummary.notCovered || policySummary.notCovered.length === 0) && (
+                       <li className="text-sm text-app-muted italic">No exclusions extracted.</li>
+                    )}
+                  </ul>
+               </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 border-t border-border">
+               {/* Deductible */}
+               <div className="bg-surface border border-border rounded-xl p-4 flex flex-col justify-center items-center text-center hover:border-brand/50 transition-colors">
+                  <DollarSign className="text-brand mb-2" size={24} />
+                  <p className="text-xs text-app-muted uppercase tracking-wider font-semibold mb-1">Deductible</p>
+                  <p className="text-lg font-medium text-app-text">{policySummary.deductible || 'Not specified'}</p>
+               </div>
+
+               {/* Coverage Limits */}
+               <div className="bg-surface border border-border rounded-xl p-4 flex flex-col justify-center items-center text-center hover:border-brand/50 transition-colors">
+                  <Target className="text-brand mb-2" size={24} />
+                  <p className="text-xs text-app-muted uppercase tracking-wider font-semibold mb-1">Coverage Limits</p>
+                  <p className="text-lg font-medium text-app-text">{policySummary.coverageLimits || 'Not specified'}</p>
+               </div>
+
+               {/* Renewal Date */}
+               <div className="bg-surface border border-border rounded-xl p-4 flex flex-col justify-center items-center text-center hover:border-brand/50 transition-colors">
+                  <Calendar className="text-brand mb-2" size={24} />
+                  <p className="text-xs text-app-muted uppercase tracking-wider font-semibold mb-1">Renewal Date</p>
+                  <p className="text-lg font-medium text-app-text">{policySummary.renewalDate || 'Not specified'}</p>
+               </div>
+            </div>
+            
+            <div className="mt-6 bg-brand/10 border border-brand/20 p-4 rounded-xl flex items-start gap-3">
+               <div className="bg-brand text-white p-2 rounded-full shrink-0">
+                 <ShieldCheck size={18} />
+               </div>
+               <div>
+                 <p className="text-sm font-medium text-brand">GigGuard AI Active</p>
+                 <p className="text-sm text-app-muted mt-1">
+                   Have "what if" questions? Just ask the assistant in the bottom right corner.
+                 </p>
+               </div>
+            </div>
+
+          </div>
+        ) : policyText ? (
           <div className="bg-green-500/10 border border-green-500/20 rounded-xl p-6 flex flex-col items-center justify-center space-y-4 text-center">
             <CheckCircle className="text-green-500" size={48} />
             <div>
-              <p className="font-medium text-green-500">Policy loaded successfully!</p>
-              <p className="text-sm text-app-muted mt-1">You can now ask the GigGuard Assistant "what if" questions based on your coverage.</p>
+              <p className="font-medium text-green-500">Policy loaded successfully but summary failed!</p>
+              <p className="text-sm text-app-muted mt-1">You can still ask the GigGuard Assistant questions.</p>
             </div>
             <button 
-              onClick={() => setPolicyText('')}
+              onClick={() => { setPolicyText(''); setPolicySummary(null); }}
               className="text-sm text-red-400 hover:text-red-300 underline mt-4"
             >
               Remove Document

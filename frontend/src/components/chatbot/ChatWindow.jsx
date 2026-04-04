@@ -35,7 +35,8 @@ export default function ChatWindow() {
       // Exclude system message, only keep conversation history
       const apiMessages = newMessages.map(m => ({ role: m.role, content: m.content }));
       
-      const res = await axios.post('http://localhost:3001/api/ai/chat', {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+      const res = await axios.post(`${apiUrl}/api/ai/chat`, {
         messages: apiMessages,
         policyText
       }, {

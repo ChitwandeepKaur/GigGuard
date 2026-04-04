@@ -1,7 +1,7 @@
 import express from 'express'
 import multer from 'multer'
 import { extractPDFText } from '../services/pdfParser.js'
-import { chatWithPolicyContext } from '../services/gemini.js'
+import { chatWithPolicyContext, summarizePolicy } from '../services/gemini.js'
 
 const router = express.Router()
 const upload = multer({ storage: multer.memoryStorage() })
@@ -10,8 +10,10 @@ router.post('/upload-policy', upload.single('policyFile'), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ error: 'No file uploaded' })
     const text = await extractPDFText(req.file.buffer)
-    res.json({ message: 'Policy successfully analyzed', extractedText: text })
+    const summary = await summarizePolicy(text)
+    res.json({ message: 'Policy successfully analyzed', extractedText: text, summary })
   } catch (err) {
+    console.error('Error analyzing policy:', err)
     res.status(500).json({ error: 'Error analyzing policy document' })
   }
 })
