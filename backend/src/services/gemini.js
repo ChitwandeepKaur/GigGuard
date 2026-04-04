@@ -1,13 +1,18 @@
 import { GoogleGenerativeAI } from '@google/generative-ai'
 
 let genAI = null;
-const MODEL_NAME = 'gemini-2.5-flash' // using standard model name
+const MODEL_NAME = 'gemini-2.5-flash'
+
+function getModel(jsonMode = false) {
+  if (!genAI) genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY)
+  return genAI.getGenerativeModel({
+    model: MODEL_NAME,
+    ...(jsonMode ? { generationConfig: { responseMimeType: 'application/json' } } : {})
+  })
+}
 
 export async function chatWithPolicyContext(messages, policyText) {
-  if (!genAI) {
-    genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY)
-  }
-  const model = genAI.getGenerativeModel({ model: MODEL_NAME })
+  const model = getModel()
 
   const systemInstruction = `You are a helpful insurance assistant. You will be provided with the user's uploaded insurance policy document.
     Your primary job is to answer user scenarios ("what if" questions) STRICTLY based on the provided policy document.
@@ -26,15 +31,7 @@ export async function chatWithPolicyContext(messages, policyText) {
 }
 
 export async function summarizePolicy(policyText) {
-  if (!genAI) {
-    genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY)
-  }
-  const model = genAI.getGenerativeModel({ 
-    model: MODEL_NAME,
-    generationConfig: {
-      responseMimeType: "application/json",
-    }
-  })
+  const model = getModel(true)
 
   const systemInstruction = `You are an insurance policy summarizer. Analyze the provided policy document and extract the key details in pure JSON format.
 Your output must be strict JSON matching this schema:
@@ -74,16 +71,9 @@ Important rules:
   }
 }
 
+// 4.4 — Insurance Recommendations
 export async function getInsuranceRecommendation(profileData) {
-  if (!genAI) {
-    genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY)
-  }
-  const model = genAI.getGenerativeModel({ 
-    model: MODEL_NAME,
-    generationConfig: {
-      responseMimeType: "application/json",
-    }
-  });
+  const model = getModel(true)
 
   const systemInstruction = `You are a financial and insurance advisor for gig workers.
 Based on the following gig worker profile, recommend exactly 3 insurance products that would best protect them.
@@ -113,5 +103,39 @@ Output must be a strict JSON strictly matching this schema:
   } catch (error) {
     console.error('Error getting insurance recommendation:', error);
     throw new Error('Failed to get recommendation');
+  }
+}
+
+// 4.3 — Gamified Quiz
+export async function generateQuizQuestions(policyText, gigType = 'gig worker') {
+  const model = getModel(true)
+
+  const prompt = `You are creating a short quiz to help a ${gigType} understand their insurance policy coverage.
+Generate exactly 5 scenario-based questions derived from the following policy document.
+Return a JSON array only — no markdown, no preamble, no trailing text.
+Each element must have exactly these fields:
+  "scenario"    — a realistic 1-2 sentence situation a gig worker might face
+  "answer"      — one of: "covered", "not_covered", "partial"
+  "clause"      — quote the specific policy section/clause that justifies the answer (keep it concise but direct)
+  "explanation" — plain English, 2-3 sentences explaining why it is/isn't covered
+
+Rules:
+- Make scenarios realistic for gig workers (rideshare, delivery, freelance).
+- Vary the coverage areas — do NOT repeat the same topic twice.
+- At least 2 scenarios should be "not_covered" to surface real gaps.
+- Do NOT hallucinate clauses — only cite what is in the document below.
+
+--- POLICY DOCUMENT ---
+${policyText.slice(0, 8000)}`
+
+  try {
+    const result = await model.generateContent(prompt)
+    const response = await result.response
+    const parsed = JSON.parse(response.text())
+    if (!Array.isArray(parsed)) throw new Error('Expected JSON array')
+    return parsed.slice(0, 5) // enforce max 5
+  } catch (error) {
+    console.error('Error generating quiz questions with Gemini:', error)
+    throw new Error('Failed to generate quiz questions')
   }
 }

@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import api from '../services/api';
 import { useStore } from '../store';
-import { Upload, FileText, CheckCircle, Loader2, ShieldCheck, XCircle, DollarSign, Calendar, Target } from 'lucide-react';
+import { Upload, FileText, CheckCircle, Loader2, ShieldCheck, XCircle, DollarSign, Calendar, Target, Brain } from 'lucide-react';
+import QuizGame from '../components/insurance/QuizGame';
 
 export default function InsuranceHub() {
   const { setPolicyText, policyText, policySummary, setPolicySummary } = useStore();
@@ -140,6 +141,7 @@ export default function InsuranceHub() {
             </div>
 
           </div>
+
         ) : policyText ? (
           <div className="bg-green-500/10 border border-green-500/20 rounded-xl p-6 flex flex-col items-center justify-center space-y-4 text-center">
             <CheckCircle className="text-green-500" size={48} />
@@ -187,6 +189,20 @@ export default function InsuranceHub() {
         {error && (
           <p className="text-red-400 text-sm mt-4 text-center">{error}</p>
         )}
+      </div>
+
+      {/* ── Quiz Card — always visible ── */}
+      <div className="bg-surface border border-border rounded-2xl p-8">
+        <h3 className="text-xl font-medium mb-1 flex items-center gap-2">
+          <Brain className="text-brand" size={22} />
+          Policy Knowledge Quiz
+        </h3>
+        <p className="text-sm text-app-muted mb-6">
+          {policyText
+            ? 'Quiz generated from your uploaded policy.'
+            : 'No policy uploaded yet — try the demo quiz to see how it works.'}
+        </p>
+        <QuizGame />
       </div>
     </div>
   );

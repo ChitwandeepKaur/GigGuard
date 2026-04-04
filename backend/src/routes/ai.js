@@ -1,7 +1,7 @@
 import express from 'express'
 import multer from 'multer'
 import { extractPDFText } from '../services/pdfParser.js'
-import { chatWithPolicyContext, summarizePolicy } from '../services/gemini.js'
+import { chatWithPolicyContext, summarizePolicy, generateQuizQuestions, getInsuranceRecommendation } from '../services/gemini.js'
 
 const router = express.Router()
 const upload = multer({ storage: multer.memoryStorage() })
@@ -21,7 +21,7 @@ router.post('/upload-policy', upload.single('policyFile'), async (req, res) => {
 router.post('/chat', async (req, res) => {
   const { messages, policyText } = req.body
   if (!messages || !policyText) return res.status(400).json({ error: 'Missing messages or policy context' })
-  
+
   try {
     const aiResponse = await chatWithPolicyContext(messages, policyText)
     res.json({ message: aiResponse })
@@ -30,16 +30,30 @@ router.post('/chat', async (req, res) => {
   }
 })
 
+// 4.3 — Gamified Quiz
+router.post('/generate-quiz', async (req, res) => {
+  const { policyText, gigType } = req.body
+  if (!policyText) return res.status(400).json({ error: 'Missing policyText' })
+
+  try {
+    const questions = await generateQuizQuestions(policyText, gigType || 'gig worker')
+    res.json({ questions })
+  } catch (err) {
+    console.error('Error generating quiz:', err)
+    res.status(500).json({ error: 'Error generating quiz questions' })
+  }
+})
+
+// 4.4 — Insurance Recommendations preview
 router.post('/recommendation/preview', async (req, res) => {
   try {
-    const { getInsuranceRecommendation } = await import('../services/gemini.js');
-    const formData = req.body;
-    const recommendations = await getInsuranceRecommendation(formData);
-    res.json(recommendations);
+    const formData = req.body
+    const recommendations = await getInsuranceRecommendation(formData)
+    res.json(recommendations)
   } catch (err) {
-    console.error('Failed to get recommendation preview:', err);
-    res.status(500).json({ error: 'Failed to generate recommendations' });
+    console.error('Failed to get recommendation preview:', err)
+    res.status(500).json({ error: 'Failed to generate recommendations' })
   }
-});
+})
 
 export default router
