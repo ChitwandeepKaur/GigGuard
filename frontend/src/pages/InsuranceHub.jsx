@@ -1,5 +1,4 @@
-import React, { useState } from 'react';
-import axios from 'axios';
+import api from '../services/api';
 import { useStore } from '../store';
 import { Upload, FileText, CheckCircle, Loader2, ShieldCheck, XCircle, DollarSign, Calendar, Target } from 'lucide-react';
 
@@ -19,10 +18,8 @@ export default function InsuranceHub() {
     formData.append('policyFile', file);
     
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
-      const res = await axios.post(`${apiUrl}/api/ai/upload-policy`, formData, {
+      const res = await api.post('/api/ai/upload-policy', formData, {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token') || 'test-token'}`,
           'Content-Type': 'multipart/form-data'
         }
       });

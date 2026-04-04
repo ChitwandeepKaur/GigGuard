@@ -17,9 +17,9 @@ router.get('/income', async (req, res, next) => {
     const entries = await prisma.incomeEntry.findMany({
       where: {
         userId: req.userId,
-        weekOf: { gte: new Date(Date.now() - 12 * 7 * 24 * 60 * 60 * 1000) }
+        week_of: { gte: new Date(Date.now() - 12 * 7 * 24 * 60 * 60 * 1000) }
       },
-      orderBy: { weekOf: 'desc' }
+      orderBy: { week_of: 'desc' }
     });
     res.json(entries);
   } catch (error) {
@@ -29,14 +29,14 @@ router.get('/income', async (req, res, next) => {
 
 router.post('/income', async (req, res, next) => {
   try {
-    const { amount, source, note, weekOf } = req.body;
+    const { amount, source, note, week_of } = req.body;
     const entry = await prisma.incomeEntry.create({
       data: {
         userId: req.userId,
         amount: Number(amount),
         source: source || 'other',
         note: note || '',
-        weekOf: weekOf ? new Date(weekOf) : new Date(),
+        week_of: week_of ? new Date(week_of) : new Date(),
       }
     });
     res.json(entry);
@@ -64,9 +64,9 @@ router.get('/summary', async (req, res, next) => {
       prisma.incomeEntry.findMany({
         where: {
           userId: req.userId,
-          weekOf: { gte: new Date(Date.now() - 12 * 7 * 24 * 60 * 60 * 1000) }
+          week_of: { gte: new Date(Date.now() - 12 * 7 * 24 * 60 * 60 * 1000) }
         },
-        orderBy: { weekOf: 'desc' }
+        orderBy: { week_of: 'desc' }
       })
     ]);
 
@@ -75,7 +75,7 @@ router.get('/summary', async (req, res, next) => {
     }
 
     const thisWeekIncome = recentIncome
-      .filter(e => isThisWeek(e.weekOf))
+      .filter(e => isThisWeek(e.week_of))
       .reduce((sum, e) => sum + e.amount, 0);
 
     const taxReserve = calcSEtaxReserve(thisWeekIncome);
@@ -83,25 +83,25 @@ router.get('/summary', async (req, res, next) => {
     // Based on available dummy/mock state since some values like available cash are complex
     const safeToSpend = calcSafeToSpend({
       availableCash: thisWeekIncome,
-      billsDueThisWeek: expenses.survivalNumber,
-      emergencyBufferTarget: expenses.survivalNumber * 3,
+      billsDueThisWeek: expenses.survival_number,
+      emergencyBufferTarget: expenses.survival_number * 3,
       currentBuffer: 0,
       weeklyTaxReserve: taxReserve,
-      volatilityScore: profile.volatilityScore
+      volatilityScore: profile.volatility_score
     });
 
-    const bufferWeeks = calcBufferWeeks(0, expenses.survivalNumber);
-    const windfall = thisWeekIncome > profile.bestWeek
-      ? calcWindfall(thisWeekIncome, profile.bestWeek) : null;
+    const bufferWeeks = calcBufferWeeks(0, expenses.survival_number);
+    const windfall = thisWeekIncome > profile.best_week
+      ? calcWindfall(thisWeekIncome, profile.best_week) : null;
 
     res.json({
       safeToSpend,
-      safeToSpendState: getSafeToSpendState(safeToSpend, expenses.survivalNumber, 150),
+      safeToSpendState: getSafeToSpendState(safeToSpend, expenses.survival_number, 150),
       bufferWeeks,
       taxReserve,
       totalTaxOwed: recentIncome.reduce((s, e) => s + (e.amount * 0.153 * 0.9), 0),
       windfall,
-      isSurvivalMode: thisWeekIncome < profile.floorIncome,
+      isSurvivalMode: thisWeekIncome < profile.floor_income,
       recentIncome
     });
   } catch (error) {

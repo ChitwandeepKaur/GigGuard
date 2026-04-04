@@ -16,30 +16,71 @@ router.get('/profile', async (req, res, next) => {
 
 router.post('/profile', async (req, res, next) => {
   try {
-    const { gigTypes, incomeFrequency, weeklyLow, weeklyHigh, worstWeek, bestWeek, rent, utilities, debtMinimums } = req.body;
+    const { 
+      gig_types, income_frequency, weekly_low, weekly_high, worst_week, best_week,
+      rent, utilities, debt_minimums, transport, groceries, insurance_cost,
+      phone, subscriptions, eating_out, shopping, entertainment
+    } = req.body;
     
-    const profile = await prisma.userProfile.create({
-      data: {
+    const profile = await prisma.userProfile.upsert({
+      where: { userId: req.userId },
+      update: {
+        gig_types: gig_types || [],
+        income_frequency: income_frequency || 'weekly',
+        weekly_low: Number(weekly_low || 0),
+        weekly_high: Number(weekly_high || 0),
+        worst_week: Number(worst_week || 0),
+        best_week: Number(best_week || 0),
+        floor_income: Number(worst_week || 0),
+        average_income: (Number(weekly_low || 0) + Number(weekly_high || 0)) / 2,
+        volatility_score: ((Number(weekly_high || 0) - Number(weekly_low || 0)) / ((Number(weekly_low || 0) + Number(weekly_high || 0)) / 2 || 1)) * 100
+      },
+      create: {
         userId: req.userId,
-        gigTypes: gigTypes || [],
-        incomeFrequency: incomeFrequency || 'weekly',
-        weeklyLow: Number(weeklyLow || 0),
-        weeklyHigh: Number(weeklyHigh || 0),
-        worstWeek: Number(worstWeek || 0),
-        bestWeek: Number(bestWeek || 0),
-        floorIncome: Number(worstWeek || 0),
-        averageIncome: (Number(weeklyLow || 0) + Number(weeklyHigh || 0)) / 2,
-        volatilityScore: ((Number(weeklyHigh || 0) - Number(weeklyLow || 0)) / ((Number(weeklyLow || 0) + Number(weeklyHigh || 0)) / 2 || 1)) * 100
+        gig_types: gig_types || [],
+        income_frequency: income_frequency || 'weekly',
+        weekly_low: Number(weekly_low || 0),
+        weekly_high: Number(weekly_high || 0),
+        worst_week: Number(worst_week || 0),
+        best_week: Number(best_week || 0),
+        floor_income: Number(worst_week || 0),
+        average_income: (Number(weekly_low || 0) + Number(weekly_high || 0)) / 2,
+        volatility_score: ((Number(weekly_high || 0) - Number(weekly_low || 0)) / ((Number(weekly_low || 0) + Number(weekly_high || 0)) / 2 || 1)) * 100
       }
     });
 
-    const expenses = await prisma.expenseProfile.create({
-      data: {
+    const nonNegotiableSum = Number(rent || 0) + Number(utilities || 0) + Number(debt_minimums || 0) + Number(transport || 0) + Number(groceries || 0) + Number(insurance_cost || 0);
+
+    const expenses = await prisma.expenseProfile.upsert({
+      where: { userId: req.userId },
+      update: {
+        rent: Number(rent || 0),
+        utilities: Number(utilities || 0),
+        debt_minimums: Number(debt_minimums || 0),
+        transport: Number(transport || 0),
+        groceries: Number(groceries || 0),
+        insurance_cost: Number(insurance_cost || 0),
+        phone: Number(phone || 0),
+        subscriptions: Number(subscriptions || 0),
+        eating_out: Number(eating_out || 0),
+        shopping: Number(shopping || 0),
+        entertainment: Number(entertainment || 0),
+        survival_number: nonNegotiableSum / 4.33
+      },
+      create: {
         userId: req.userId,
         rent: Number(rent || 0),
         utilities: Number(utilities || 0),
-        debtMinimums: Number(debtMinimums || 0),
-        survivalNumber: (Number(rent || 0) + Number(utilities || 0) + Number(debtMinimums || 0)) / 4.33
+        debt_minimums: Number(debt_minimums || 0),
+        transport: Number(transport || 0),
+        groceries: Number(groceries || 0),
+        insurance_cost: Number(insurance_cost || 0),
+        phone: Number(phone || 0),
+        subscriptions: Number(subscriptions || 0),
+        eating_out: Number(eating_out || 0),
+        shopping: Number(shopping || 0),
+        entertainment: Number(entertainment || 0),
+        survival_number: nonNegotiableSum / 4.33
       }
     });
 

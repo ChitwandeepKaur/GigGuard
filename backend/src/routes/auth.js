@@ -1,6 +1,7 @@
 import express from 'express';
 import { createClient } from '@supabase/supabase-js';
 import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcryptjs';
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -15,14 +16,17 @@ router.post('/register', async (req, res, next) => {
     const { email, password } = req.body;
     if (!email || !password) return res.status(400).json({ error: 'Email and password required' });
 
+    // Hash the password as requested
+    const password_hash = await bcrypt.hash(password, 10);
+
     const { data, error } = await supabase.auth.signUp({ email, password });
     if (error) return res.status(400).json({ error: error.message });
 
     if (data.user) {
       await prisma.user.upsert({
         where: { id: data.user.id },
-        update: { email },
-        create: { id: data.user.id, email }
+        update: { email, password_hash },
+        create: { id: data.user.id, email, password_hash }
       });
     }
 

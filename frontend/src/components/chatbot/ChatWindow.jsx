@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, Loader2 } from 'lucide-react';
-import axios from 'axios';
+import api from '../../services/api';
 import { useStore } from '../../store';
 
 export default function ChatWindow({ isSidebar = false }) {
@@ -35,15 +35,9 @@ export default function ChatWindow({ isSidebar = false }) {
       // Exclude system message, only keep conversation history
       const apiMessages = newMessages.map(m => ({ role: m.role, content: m.content }));
       
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
-      const res = await axios.post(`${apiUrl}/api/ai/chat`, {
+      const res = await api.post('/api/ai/chat', {
         messages: apiMessages,
         policyText
-      }, {
-        headers: { 
-          'Authorization': `Bearer ${localStorage.getItem('token') || 'test-token'}`,
-          'Content-Type': 'application/json'
-        }
       });
 
       setMessages([...newMessages, { role: 'assistant', content: res.data.message }]);
