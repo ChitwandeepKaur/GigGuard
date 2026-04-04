@@ -12,7 +12,7 @@ import { authenticate } from './middleware/auth.js'
 dotenv.config()
 
 const app = express()
-app.use(cors({ origin: process.env.CLIENT_URL }))
+app.use(cors({ origin: process.env.CLIENT_URL || 'http://localhost:5173' }))
 app.use(express.json({ limit: '10mb' }))
 
 // Public routes
@@ -22,7 +22,8 @@ app.use('/api/auth', authRoutes)
 app.use('/api/user', authenticate, userRoutes)
 app.use('/api/finance', authenticate, financeRoutes)
 app.use('/api/insurance', authenticate, insuranceRoutes)
-app.use('/api/ai', authenticate, aiRoutes)
+app.use('/api/ai', aiRoutes) // Public for now for easy RAG testing
+
 
 app.use(errorHandler)
 
