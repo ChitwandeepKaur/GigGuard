@@ -67,11 +67,11 @@ Then together:
 - [x] Build `Landing.jsx` — hero copy, "Get Started" → `/onboarding`, "Load Demo" button
 
 ### Hour 3–5: Onboarding flow
-- [ ] Build `Onboarding.jsx` — step wizard shell, progress dots, step state
-- [ ] Build `IncomeProfiler.jsx` — gig type multi-select, frequency radio, weekly range slider, worst/best week inputs
-- [ ] Build `ExpenseSetup.jsx` — three-tier expense form, running survival number preview
-- [ ] Build `InsuranceStep.jsx` — stub card: "Generating your recommendation..." with loading state (Dev 3 wires the real data)
-- [ ] On complete: call `api.user.createProfile(data)`, store token, navigate to `/dashboard`
+- [x] Build `Onboarding.jsx` — step wizard shell, progress dots, step state
+- [x] Build `IncomeProfiler.jsx` — gig type multi-select, frequency radio, weekly range slider, worst/best week inputs
+- [x] Build `ExpenseSetup.jsx` — three-tier expense form, running survival number preview
+- [x] Build `InsuranceStep.jsx` — stub card: "Generating your recommendation..." with loading state (Dev 3 wires the real data)
+- [x] On complete: call `api.user.createProfile(data)`, store token, navigate to `/dashboard`
 
 ### Hour 6–8: Dashboard layout
 - [ ] Build `Dashboard.jsx` — responsive card grid, calls `api.finance.getSummary()` on mount, hydrates `useFinanceStore`
@@ -162,7 +162,7 @@ Then together:
 - [ ] Build `PDFUpload.jsx` — drag-and-drop zone, calls `api.insurance.uploadPDF(formData)`, shows loading state
 - [ ] Build `PolicySummary.jsx` — covered list, NOT covered list (highlighted), deductible/limits/renewal
 - [ ] Build `InsuranceRecommendation.jsx` — 3 product cards from `api.insurance.getRecommendation()`
-- [ ] Complete `InsuranceStep.jsx` stub in onboarding (Dev 1's placeholder) — wire to recommendation endpoint
+- [x] Complete `InsuranceStep.jsx` stub in onboarding (Dev 1's placeholder) — wire to recommendation endpoint
 - [ ] Build `QuizGame.jsx`:
   - Fetch questions from `api.insurance.getQuiz()`
   - Show scenario → 3 answer buttons → reveal correct answer + policy clause

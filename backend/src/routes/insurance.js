@@ -1,4 +1,6 @@
 import express from 'express'
+import { getInsuranceRecommendation } from '../services/gemini.js'
+
 const router = express.Router()
 
 router.get('/policy', async (req, res) => { res.json({ message: 'TODO' }) })

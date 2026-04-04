@@ -73,3 +73,45 @@ Important rules:
     throw new Error('Failed to summarize policy')
   }
 }
+
+export async function getInsuranceRecommendation(profileData) {
+  if (!genAI) {
+    genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY)
+  }
+  const model = genAI.getGenerativeModel({ 
+    model: MODEL_NAME,
+    generationConfig: {
+      responseMimeType: "application/json",
+    }
+  });
+
+  const systemInstruction = `You are a financial and insurance advisor for gig workers.
+Based on the following gig worker profile, recommend exactly 3 insurance products that would best protect them.
+Output must be a strict JSON strictly matching this schema:
+[
+  {
+    "product": "Product Name (e.g. Rideshare Endorsement)",
+    "reason": "Why they need this specifically based on their provided data.",
+    "priority": "high",
+    "gap_description": "What financial gap this covers (e.g. 'Covers the gap between app-provided insurance and personal auto')"
+  }
+]`;
+
+  const prompt = `${systemInstruction}\n\n--- USER PROFILE ---\n${JSON.stringify(profileData, null, 2)}`;
+
+  try {
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    const jsonString = response.text();
+    try {
+      const parsed = JSON.parse(jsonString);
+      return Array.isArray(parsed) ? parsed : Object.values(parsed);
+    } catch (parseError) {
+      console.error('Failed to parse Gemini output as JSON:', jsonString);
+      return [];
+    }
+  } catch (error) {
+    console.error('Error getting insurance recommendation:', error);
+    throw new Error('Failed to get recommendation');
+  }
+}

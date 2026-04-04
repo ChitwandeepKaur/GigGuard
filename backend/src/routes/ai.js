@@ -30,4 +30,16 @@ router.post('/chat', async (req, res) => {
   }
 })
 
+router.post('/recommendation/preview', async (req, res) => {
+  try {
+    const { getInsuranceRecommendation } = await import('../services/gemini.js');
+    const formData = req.body;
+    const recommendations = await getInsuranceRecommendation(formData);
+    res.json(recommendations);
+  } catch (err) {
+    console.error('Failed to get recommendation preview:', err);
+    res.status(500).json({ error: 'Failed to generate recommendations' });
+  }
+});
+
 export default router
