@@ -56,15 +56,15 @@ Then together:
 **Owns:** All client-side UI. Calls `api.*` functions — never fetches directly.
 
 ### Hour 1–2: Foundation + UI components
-- [ ] Set up `tailwind.config.js` with brand colors and fonts (copy from TECH_STACK.md)
-- [ ] Add Google Fonts to `index.html` (Syne + DM Sans + DM Mono)
-- [ ] Build `src/components/ui/`:
+- [x] Set up `tailwind.config.js` with brand colors and fonts (copy from TECH_STACK.md)
+- [x] Add Google Fonts to `index.html` (Syne + DM Sans + DM Mono)
+- [x] Build `src/components/ui/`:
   - `Card.jsx` — default / hero / warning / danger variants
   - `Button.jsx` — primary / secondary / danger
   - `Badge.jsx` — state badge (safe / warning / risky / danger)
   - `ProgressBar.jsx` — animated fill, takes `value` and `color` props
-- [ ] Set up React Router + `ProtectedRoute` in `App.jsx` (copy from TECH_STACK.md)
-- [ ] Build `Landing.jsx` — hero copy, "Get Started" → `/onboarding`, "Load Demo" button
+- [x] Set up React Router + `ProtectedRoute` in `App.jsx` (copy from TECH_STACK.md)
+- [x] Build `Landing.jsx` — hero copy, "Get Started" → `/onboarding`, "Load Demo" button
 
 ### Hour 3–5: Onboarding flow
 - [ ] Build `Onboarding.jsx` — step wizard shell, progress dots, step state

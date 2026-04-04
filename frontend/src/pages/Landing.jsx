@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import Button from '../components/ui/Button';
 
 export default function Landing() {
   const navigate = useNavigate();
@@ -9,12 +10,13 @@ export default function Landing() {
       <p className="text-xl text-app-muted max-w-xl mb-12 font-body italic">
         Financial security for the modern gig economy.
       </p>
-      <button 
+      <Button 
         onClick={() => navigate('/onboarding')}
-        className="px-12 py-4 bg-brand text-white font-bold rounded-hero hover:bg-brand-light transition-all transform hover:scale-105 shadow-lg"
+        className="!rounded-[16px] !px-12 !py-4 shadow-lg text-lg transform hover:scale-105"
       >
         Get Started
-      </button>
+      </Button>
+      
     </div>
   );
 }
