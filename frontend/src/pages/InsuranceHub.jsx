@@ -37,7 +37,7 @@ export default function InsuranceHub() {
   };
 
   return (
-    <div className="p-8 max-w-4xl mx-auto space-y-8">
+    <div className="p-10 w-full space-y-10">
       <div>
         <h2 className="text-3xl font-display text-brand mb-2">Insurance Hub</h2>
         <p className="text-app-muted">Policy analysis and AI-powered recommendations.</p>
@@ -136,7 +136,7 @@ export default function InsuranceHub() {
                <div>
                  <p className="text-sm font-medium text-brand">GigGuard AI Active</p>
                  <p className="text-sm text-app-muted mt-1">
-                   Have "what if" questions? Just ask the assistant in the bottom right corner.
+                   Have "what if" questions? Just ask the assistant on the right.
                  </p>
                </div>
             </div>

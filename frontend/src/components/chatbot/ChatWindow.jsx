@@ -3,7 +3,7 @@ import { Send, Loader2 } from 'lucide-react';
 import axios from 'axios';
 import { useStore } from '../../store';
 
-export default function ChatWindow() {
+export default function ChatWindow({ isSidebar = false }) {
   const { policyText } = useStore();
   const [messages, setMessages] = useState([
     { role: 'assistant', content: 'Hi there! I am your GigGuard AI Assistant. How can I help you understand your insurance policy today?' }
@@ -55,12 +55,19 @@ export default function ChatWindow() {
     }
   };
 
+  const containerStyles = isSidebar 
+    ? "flex flex-col h-[750px] max-h-[85vh] w-full max-w-[420px] bg-white rounded-3xl border-2 border-[#D3D1C7]/50 shadow-2xl overflow-hidden relative"
+    : "absolute bottom-20 right-0 w-[420px] h-[600px] bg-white rounded-3xl shadow-2xl border-2 border-[#D3D1C7]/50 flex flex-col overflow-hidden animate-in slide-in-from-bottom-4 z-50 transition-all";
+
   return (
-    <div className="absolute bottom-20 right-0 w-[350px] h-[500px] bg-surface rounded-2xl shadow-2xl border border-border flex flex-col overflow-hidden animate-in slide-in-from-bottom-4 z-50">
-      <div className="bg-brand p-4 flex justify-between items-center text-white">
-        <div>
-          <h3 className="font-display font-medium text-lg border-none focus:outline-none">GigGuard Assistant</h3>
-          <p className="text-xs opacity-80">Online & ready to help</p>
+    <div className={containerStyles}>
+      <div className="bg-[#0F6E56] p-5 flex justify-between items-center text-white shrink-0 shadow-sm relative z-20">
+        <div className="flex items-center gap-3">
+          <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse shadow-[0_0_8px_rgba(74,222,128,0.6)]" />
+          <div className="border-none focus:outline-none">
+            <h3 className="font-display font-semibold text-lg leading-tight">GigGuard Assistant</h3>
+            <p className="text-[10px] uppercase tracking-widest opacity-80 font-bold">Online</p>
+          </div>
         </div>
       </div>
       
