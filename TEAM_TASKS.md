@@ -94,17 +94,17 @@ Then together:
 **Owns:** All financial logic on the server + Survival Mode UI on the client.
 
 ### Hour 1–2: Server calculations + finance routes
-- [ ] Build `server/src/services/calculations.js` — all math functions (copy from TECH_STACK.md):
+- [x] Build `server/src/services/calculations.js` — all math functions (copy from TECH_STACK.md):
   - `calcFloorIncome`, `calcAverageIncome`, `calcVolatilityScore`
   - `calcWeeklySurvivalNumber`, `calcSEtaxReserve`
   - `calcSafeToSpend`, `getSafeToSpendState`
   - `calcBufferWeeks`, `calcWindfall`
-- [ ] Build `server/src/routes/finance.js`:
+- [x] Build `server/src/routes/finance.js`:
   - `GET /api/finance/summary` — runs all calculations, returns full dashboard payload
   - `POST /api/finance/income` — saves income entry to DB
   - `GET /api/finance/income` — returns last 12 weeks of entries
-- [ ] Register finance routes in `server/src/index.js`
-- [ ] Test with Postman or curl: `POST /api/finance/income` and `GET /api/finance/summary`
+- [x] Register finance routes in `server/src/index.js`
+- [x] Test with Postman or curl: `POST /api/finance/income` and `GET /api/finance/summary`
 
 ### Hour 3–5: Wire calculations to client dashboard
 - [ ] Build `client/src/store/useFinanceStore.js` (copy from TECH_STACK.md)
