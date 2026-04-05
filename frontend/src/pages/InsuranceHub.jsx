@@ -187,7 +187,7 @@ export default function InsuranceHub() {
                          <th className="font-medium p-4 font-mono uppercase tracking-widest text-[10px] border-l border-border">Your Uploaded Policy</th>
                          <th className="font-medium p-4 font-mono uppercase tracking-widest text-[10px] bg-brand/5 border-l border-brand/20">State Farm Rideshare</th>
                          <th className="font-medium p-4 font-mono uppercase tracking-widest text-[10px] bg-brand/10 border-l border-brand/30 text-brand">
-                             Commercial Auto <span className="ml-2 inline-flex items-center gap-1 bg-brand text-white px-2 py-0.5 rounded-full text-[8px] font-bold">BEST MATCH</span>
+                             State Farm Commercial Auto <span className="ml-2 inline-flex items-center gap-1 bg-brand text-white px-2 py-0.5 rounded-full text-[8px] font-bold">BEST MATCH</span>
                          </th>
                        </tr>
                      </thead>
