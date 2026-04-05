@@ -36,7 +36,7 @@ export default function InsuranceHub() {
   };
 
   return (
-    <div className="p-10 w-full space-y-10">
+    <div className="p-4 sm:p-10 w-full space-y-10 pb-24">
       <div>
         <h2 className="text-3xl font-display text-brand mb-2">Insurance Hub</h2>
         <p className="text-app-muted">Policy analysis and AI-powered recommendations.</p>
@@ -65,7 +65,7 @@ export default function InsuranceHub() {
               </button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                {/* Covered Card */}
                <div className="bg-green-500/5 border border-green-500/20 rounded-2xl p-6">
                   <div className="flex items-center gap-3 mb-4 text-green-500">
@@ -176,7 +176,7 @@ export default function InsuranceHub() {
             </button>
           </div>
         ) : (
-          <div className="border-2 border-dashed border-border rounded-xl p-12 flex flex-col items-center justify-center text-center space-y-4 hover:border-brand/50 transition-colors bg-app-bg group">
+          <div className="border-2 border-dashed border-border rounded-xl p-8 sm:p-12 flex flex-col items-center justify-center text-center space-y-4 hover:border-brand/50 transition-colors bg-app-bg group">
             {isUploading ? (
               <div className="flex flex-col items-center space-y-4">
                 <Loader2 className="animate-spin text-brand" size={48} />
@@ -211,7 +211,7 @@ export default function InsuranceHub() {
       </div>
 
       {/* ── Quiz Card — always visible ── */}
-      <div className="bg-surface border border-border rounded-2xl p-8">
+      <div className="bg-surface border border-border rounded-2xl p-6 sm:p-8">
         <h3 className="text-xl font-medium mb-1 flex items-center gap-2">
           <Brain className="text-brand" size={22} />
           Policy Knowledge Quiz

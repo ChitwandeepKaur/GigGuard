@@ -50,7 +50,7 @@ export default function InsuranceStep({ formData, isSubmitting, onComplete, onBa
     <div className="py-6 text-left animate-in slide-in-from-bottom-2 duration-500">
       <h2 className="text-3xl font-syne text-brand mb-6 text-center">Your Financial Snapshot</h2>
       
-      <div className="grid grid-cols-2 gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
         <div className="bg-danger/10 p-4 rounded-xl border border-danger/20 text-center">
           <p className="text-sm font-semibold text-danger uppercase tracking-wider mb-1">Weekly Survival #</p>
           <p className="text-3xl font-bold font-mono text-danger-dark">${survivalNumber}</p>
@@ -154,9 +154,9 @@ export default function InsuranceStep({ formData, isSubmitting, onComplete, onBa
           )}
         </div>
 
-        <div className="flex gap-4 mt-6 pt-4 border-t border-gray-100">
-          <Button variant="secondary" onClick={() => setShowSnapshot(true)} className="w-1/3 py-3" disabled={isSubmitting}>Back to Snapshot</Button>
-          <Button onClick={onComplete} className="w-2/3 py-3 shadow-md" disabled={isSubmitting}>
+        <div className="flex flex-col sm:flex-row gap-4 mt-6 pt-4 border-t border-gray-100">
+          <Button variant="secondary" onClick={() => setShowSnapshot(true)} className="w-full sm:w-1/3 py-3" disabled={isSubmitting}>Back to Snapshot</Button>
+          <Button onClick={onComplete} className="w-full sm:w-2/3 py-3 shadow-md" disabled={isSubmitting}>
             {isSubmitting ? 'Saving Profile...' : 'Complete Configuration'}
           </Button>
         </div>

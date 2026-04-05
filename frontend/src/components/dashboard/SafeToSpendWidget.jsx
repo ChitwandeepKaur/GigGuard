@@ -20,15 +20,15 @@ export default function SafeToSpendWidget({ amount, state, billsDue, availableCa
 
   return (
     <div className={`${bgColor} p-8 rounded-card shadow-lg transition-all duration-300 transform hover:scale-[1.02]`}>
-      <div className="flex justify-between items-start">
+      <div className="flex flex-wrap justify-between items-start gap-4">
         <div>
-          <h3 className="text-sm font-mono uppercase tracking-widest opacity-80">Safe-to-Spend This Week</h3>
-          <p className="text-5xl font-bold mt-2 font-display">
+          <h3 className="text-[10px] sm:text-sm font-mono uppercase tracking-widest opacity-80">Safe-to-Spend This Week</h3>
+          <p className="text-4xl sm:text-5xl font-bold mt-2 font-display">
             ${amount?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </p>
         </div>
-        <div className="text-right">
-          <span className="px-3 py-1 bg-white/20 rounded-full text-xs font-bold uppercase tracking-wider">
+        <div className="text-left sm:text-right">
+          <span className="px-3 py-1 bg-white/20 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-wider whitespace-nowrap">
             {label}
           </span>
         </div>

@@ -44,7 +44,7 @@ export default function IncomeProfiler({ formData, setFormData, onNext }) {
 
         <div>
           <label className="block text-sm font-medium mb-2 text-gray-700">Income Frequency <span className="text-danger">*</span></label>
-          <div className="flex gap-6">
+          <div className="flex flex-wrap gap-3 sm:gap-6">
             {['daily', 'weekly', 'random'].map(freq => (
               <label key={freq} className="flex items-center space-x-2 cursor-pointer bg-gray-50 px-3 py-2 border rounded-lg hover:border-brand transition-colors">
                 <input 
@@ -60,7 +60,7 @@ export default function IncomeProfiler({ formData, setFormData, onNext }) {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
           <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
             <label className="block text-sm font-medium text-gray-700 mb-1">Average Weekly Low ($) <span className="text-danger">*</span></label>
             <input type="number" className="w-full bg-white border border-gray-200 p-2 rounded-md outline-none focus:border-brand focus:ring-1 focus:ring-brand transition-all" 

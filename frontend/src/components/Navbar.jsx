@@ -1,5 +1,6 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
+import { Menu, X, User, LogOut } from 'lucide-react';
 import api from '../services/api';
 
 const Navbar = () => {
@@ -7,6 +8,7 @@ const Navbar = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAuthenticating, setIsAuthenticating] = useState(!!localStorage.getItem('token'));
 
   useEffect(() => {
@@ -32,6 +34,7 @@ const Navbar = () => {
     };
     
     fetchUser();
+    setIsMenuOpen(false); // Close menu on navigation
   }, [location.pathname]); // Re-runs when the user navigates (e.g. after login)
 
   const handleLogout = async () => {
@@ -84,70 +87,117 @@ const Navbar = () => {
             </div>
           </div>
           
-          {/* Top Right Auth Section */}
-          <div className="flex items-center">
-            {isAuthenticating ? (
-              <div className="ml-4 h-9 w-28 bg-gray-200/50 animate-pulse rounded-md" />
-            ) : user ? (
-              <div 
-                className="relative ml-3"
-                onMouseEnter={() => setIsDropdownOpen(true)}
-                onMouseLeave={() => setIsDropdownOpen(false)}
-              >
-                <div className="flex items-center cursor-pointer space-x-2 p-2 rounded-md hover:bg-gray-50 transition-colors">
-                  <div className="h-8 w-8 rounded-full bg-brand/10 border border-brand/30 flex items-center justify-center text-brand font-bold uppercase overflow-hidden">
-                    {displayName.charAt(0)}
-                  </div>
-                  <span className="text-sm font-medium text-gray-700 hidden sm:block">
-                    {displayName}
-                  </span>
-                </div>
-
-                {isDropdownOpen && (
-                  <div className="absolute right-0 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 focus:outline-none transition-all">
-                    <div className="px-4 py-2 text-xs text-gray-500 border-b border-gray-100">
-                      Signed in as<br/>
-                      <span className="font-medium text-gray-900 truncate block">{user.email}</span>
+          {/* Top Right Group: Auth + Mobile Menu */}
+          <div className="flex items-center space-x-2">
+            {/* Top Right Auth Section */}
+            <div className="flex items-center">
+              {isAuthenticating ? (
+                <div className="ml-4 h-9 w-28 bg-gray-200/50 animate-pulse rounded-md" />
+              ) : user ? (
+                <div 
+                  className="relative ml-3"
+                  onMouseEnter={() => setIsDropdownOpen(true)}
+                  onMouseLeave={() => setIsDropdownOpen(false)}
+                >
+                  <div className="flex items-center cursor-pointer space-x-2 p-2 rounded-md hover:bg-gray-50 transition-colors">
+                    <div className="h-8 w-8 rounded-full bg-brand/10 border border-brand/30 flex items-center justify-center text-brand font-bold uppercase overflow-hidden">
+                      {displayName.charAt(0)}
                     </div>
-                    <button
-                      onClick={handleLogout}
-                      className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors"
-                    >
-                      Logout
-                    </button>
+                    <span className="text-sm font-medium text-gray-700 hidden sm:block">
+                      {displayName}
+                    </span>
                   </div>
-                )}
-              </div>
-            ) : (
-              <button 
-                onClick={() => navigate('/auth')}
-                className="ml-4 px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-brand hover:bg-brand-dark focus:outline-none"
-              >
-                Login / Signup
-              </button>
-            )}
-          </div>
-          
-          <div className="flex items-center sm:hidden ml-2">
-             {/* Mobile menu logic could go here later */}
+
+                  {isDropdownOpen && (
+                    <div className="absolute right-0 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 focus:outline-none transition-all">
+                      <div className="px-4 py-2 text-xs text-gray-500 border-b border-gray-100">
+                        Signed in as<br/>
+                        <span className="font-medium text-gray-900 truncate block">{user.email}</span>
+                      </div>
+                      <button
+                        onClick={handleLogout}
+                        className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors"
+                      >
+                        Logout
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <button 
+                  onClick={() => navigate('/auth')}
+                  className="ml-4 px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-brand hover:bg-brand-dark focus:outline-none"
+                >
+                  Login / Signup
+                </button>
+              )}
+            </div>
+            
+            <div className="flex items-center sm:hidden">
+               <button
+                 onClick={() => setIsMenuOpen(!isMenuOpen)}
+                 className="inline-flex items-center justify-center p-2 rounded-md text-app-muted hover:text-brand hover:bg-app-muted/5 transition-colors focus:outline-none"
+               >
+                 <span className="sr-only">Open main menu</span>
+                 {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+               </button>
+            </div>
           </div>
         </div>
       </div>
-      <div className="sm:hidden border-t border-app-border">
-        <div className="pt-2 pb-3 space-y-1">
+      {/* Mobile Menu Content */}
+      <div className={`${isMenuOpen ? 'block' : 'hidden'} sm:hidden border-t border-app-border bg-app-card animate-in slide-in-from-top duration-300`}>
+        <div className="pt-2 pb-3 space-y-1 px-2">
           {links.map((link) => (
              <Link
               key={link.path}
               to={link.path}
-              className={`block pl-3 pr-4 py-2 border-l-4 text-base font-medium ${
+              className={`block pl-3 pr-4 py-3 border-l-4 text-base font-medium transition-all ${
                 location.pathname === link.path
-                  ? 'bg-brand-surface border-brand text-brand'
-                  : 'border-transparent text-app-muted hover:bg-app-bg hover:border-brand-light hover:text-app-text'
+                  ? 'bg-brand/5 border-brand text-brand'
+                  : 'border-transparent text-app-muted hover:bg-brand/5 hover:border-brand-light hover:text-app-text'
               }`}
             >
               {link.name}
             </Link>
           ))}
+          
+          {/* Mobile Auth User Info */}
+          {user && (
+            <div className="pt-4 pb-3 border-t border-app-border mt-4">
+              <div className="flex items-center px-4">
+                <div className="flex-shrink-0">
+                  <div className="h-10 w-10 rounded-full bg-brand/10 border border-brand/30 flex items-center justify-center text-brand font-bold uppercase">
+                    {displayName.charAt(0)}
+                  </div>
+                </div>
+                <div className="ml-3">
+                  <div className="text-base font-medium text-app-text">{displayName}</div>
+                  <div className="text-sm font-medium text-app-muted truncate">{user.email}</div>
+                </div>
+              </div>
+              <div className="mt-3 space-y-1">
+                <button
+                  onClick={handleLogout}
+                  className="block w-full text-left px-4 py-2 text-base font-medium text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors flex items-center gap-2"
+                >
+                  <LogOut size={18} />
+                  Logout
+                </button>
+              </div>
+            </div>
+          )}
+          
+          {!user && !isAuthenticating && (
+            <div className="p-4">
+              <button 
+                onClick={() => navigate('/auth')}
+                className="w-full px-4 py-3 border border-transparent rounded-xl shadow-sm text-base font-medium text-white bg-brand hover:bg-brand-dark focus:outline-none text-center"
+              >
+                Login / Signup
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </nav>

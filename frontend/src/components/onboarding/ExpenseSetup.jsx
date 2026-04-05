@@ -44,7 +44,7 @@ export default function ExpenseSetup({ formData, setFormData, onNext, onBack }) 
         <section className="bg-danger/5 p-5 rounded-xl border border-danger/10">
           <h3 className="font-bold text-danger mb-1 text-lg flex items-center"><span className="mr-2">🚨</span> 1. Non-Negotiables (Monthly)</h3>
           <p className="text-sm text-danger/80 mb-4 font-medium">Things you absolutely must pay to survive.</p>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {['rent', 'utilities', 'debt_minimums', 'transport', 'groceries', 'insurance_cost'].map(field => {
               const isRequired = ['rent', 'utilities', 'groceries'].includes(field);
               return (
@@ -63,7 +63,7 @@ export default function ExpenseSetup({ formData, setFormData, onNext, onBack }) 
         <section className="bg-warn/5 p-5 rounded-xl border border-warn/10">
           <h3 className="font-bold text-warn mb-1 text-lg flex items-center"><span className="mr-2">⚠️</span> 2. Semi-Flexible (Monthly)</h3>
           <p className="text-sm text-warn/80 mb-4 font-medium">Important, but you could reduce or pause them.</p>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {['phone', 'subscriptions'].map(field => (
               <div key={field}>
                 <label className="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wider">{field.replace('_', ' ')} ($)</label>
@@ -77,7 +77,7 @@ export default function ExpenseSetup({ formData, setFormData, onNext, onBack }) 
         <section className="bg-gray-50 p-5 rounded-xl border border-gray-100">
           <h3 className="font-bold text-gray-600 mb-1 text-lg flex items-center"><span className="mr-2">☕</span> 3. Fully Flexible (Monthly)</h3>
           <p className="text-sm text-gray-500 mb-4 font-medium">Discretionary spending that changes weekly.</p>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {['eating_out', 'shopping', 'entertainment'].map(field => (
               <div key={field}>
                 <label className="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wider">{field.replace('_', ' ')} ($)</label>
@@ -93,9 +93,9 @@ export default function ExpenseSetup({ formData, setFormData, onNext, onBack }) 
         {!isFormValid() && (
           <p className="text-sm text-gray-500 mb-3 text-center">Please fill out core required expenses (*) to continue.</p>
         )}
-        <div className="flex gap-4">
-          <Button variant="secondary" onClick={onBack} className="w-1/3 py-3">Back</Button>
-          <Button onClick={onNext} disabled={!isFormValid()} className="w-2/3 py-3 shadow-md disabled:opacity-50 disabled:cursor-not-allowed">
+        <div className="flex flex-col sm:flex-row gap-4">
+          <Button variant="secondary" onClick={onBack} className="w-full sm:w-1/3 py-3">Back</Button>
+          <Button onClick={onNext} disabled={!isFormValid()} className="w-full sm:w-2/3 py-3 shadow-md disabled:opacity-50 disabled:cursor-not-allowed">
             Calculate Profile
           </Button>
         </div>

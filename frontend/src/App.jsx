@@ -20,9 +20,9 @@ function AppContent() {
   const isInsurancePage = location.pathname === '/insurance';
 
   return (
-    <div className="flex flex-1 overflow-hidden">
+    <div className="flex flex-1">
       {/* Main Content Area */}
-      <main className="flex-1 overflow-y-auto">
+      <main className="flex-1">
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/auth" element={<Auth />} />

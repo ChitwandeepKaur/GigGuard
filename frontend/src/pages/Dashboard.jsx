@@ -76,22 +76,22 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="p-8 bg-app-bg min-h-screen max-w-7xl mx-auto pb-24">
-      <div className="flex justify-between items-center mb-8">
+    <div className="p-4 sm:p-8 bg-app-bg min-h-screen max-w-7xl mx-auto pb-24">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 mb-8">
         <div>
-          <h2 className="text-4xl font-display text-brand font-bold">Dashboard</h2>
-          <p className="text-app-muted text-sm font-mono mt-1 uppercase tracking-widest">Financial Wellness Control Center</p>
+          <h2 className="text-3xl sm:text-4xl font-display text-brand font-bold">Dashboard</h2>
+          <p className="text-app-muted text-xs sm:text-sm font-mono mt-1 uppercase tracking-widest">Financial Wellness Control Center</p>
         </div>
-        <div className="flex gap-4">
+        <div className="flex gap-3 sm:gap-4 w-full sm:w-auto">
           <button 
             onClick={() => setShowUpdateModal(true)}
-            className="px-4 py-2 text-app-muted text-[10px] font-bold rounded-sm border border-app-border hover:bg-app-muted/5 transition-all uppercase tracking-widest"
+            className="flex-1 sm:flex-none px-4 py-2 text-app-muted text-[10px] font-bold rounded-sm border border-app-border hover:bg-app-muted/5 transition-all uppercase tracking-widest"
           >
             Adjust Balance
           </button>
           <button 
             onClick={() => setShowLogModal(true)}
-            className="px-6 py-2 bg-brand text-white text-[10px] font-bold rounded-sm hover:bg-brand-dark transition-all uppercase tracking-widest shadow-lg shadow-brand/20"
+            className="flex-1 sm:flex-none px-6 py-2 bg-brand text-white text-[10px] font-bold rounded-sm hover:bg-brand-dark transition-all uppercase tracking-widest shadow-lg shadow-brand/20"
           >
             Log Transaction
           </button>

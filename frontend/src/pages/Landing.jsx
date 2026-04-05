@@ -8,9 +8,9 @@ export default function Landing() {
   const isLoggedIn = !!localStorage.getItem('token');
   
   return (
-    <div className="min-h-screen bg-app-bg overflow-x-hidden flex flex-col pt-8">
+    <div className="min-h-screen bg-app-bg overflow-x-hidden flex flex-col pt-4 sm:pt-8 text-app-text">
       {/* Hero Section */}
-      <section className="relative px-6 pt-16 pb-24 lg:pt-32 lg:pb-32 max-w-7xl mx-auto w-full flex flex-col lg:flex-row items-center gap-12 z-10">
+      <section className="relative px-4 sm:px-8 pt-10 pb-20 lg:pt-32 lg:pb-32 max-w-7xl mx-auto w-full flex flex-col lg:flex-row items-center gap-12 z-10">
         
         {/* Text Content */}
         <div className="flex-1 text-center lg:text-left space-y-8 animate-in slide-in-from-bottom-8 duration-700">
@@ -19,14 +19,14 @@ export default function Landing() {
             Your Financial Safety Net
           </div>
           
-          <h1 className="text-5xl lg:text-7xl font-display font-extrabold text-app-text leading-[1.1]">
+          <h1 className="text-4xl sm:text-5xl lg:text-7xl font-display font-extrabold text-app-text leading-[1.1]">
             Security for the <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand to-emerald-400">
               Gig Economy.
             </span>
           </h1>
           
-          <p className="text-lg lg:text-xl text-app-muted max-w-xl mx-auto lg:mx-0 font-body leading-relaxed">
+          <p className="text-base sm:text-lg lg:text-xl text-app-muted max-w-xl mx-auto lg:mx-0 font-body leading-relaxed">
             Stop stressing over irregular income. GigGuard automatically tracks your taxes, builds your safety net, and analyzes confusing insurance policies using AI.
           </p>
           
