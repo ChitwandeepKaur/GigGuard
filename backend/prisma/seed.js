@@ -9,6 +9,7 @@ async function main() {
   // Clean existing demo data
   await prisma.insuranceRecommendation.deleteMany({ where: { user: { email: 'marcus@demo.com' } } })
   await prisma.insurancePolicy.deleteMany({ where: { user: { email: 'marcus@demo.com' } } })
+  await prisma.expenseEntry.deleteMany({ where: { user: { email: 'marcus@demo.com' } } })
   await prisma.incomeEntry.deleteMany({ where: { user: { email: 'marcus@demo.com' } } })
   await prisma.expenseProfile.deleteMany({ where: { user: { email: 'marcus@demo.com' } } })
   await prisma.userProfile.deleteMany({ where: { user: { email: 'marcus@demo.com' } } })
@@ -126,6 +127,30 @@ async function main() {
     })
   }
   console.log('Created', incomeHistory.length, 'income entries')
+  
+  // ─── EXPENSE ENTRIES ────────────────────────────────────────────
+  const expenseHistory = [
+    { daysAgo: 2, amount: 45.20, category: 'fuel',     note: 'Shell station fill-up' },
+    { daysAgo: 5, amount: 12.50, category: 'food',     note: 'Lunch on route' },
+    { daysAgo: 8, amount: 89.99, category: 'service',  note: 'Oil change and inspection' },
+    { daysAgo: 10, amount: 35.00, category: 'fuel',    note: 'Gas' },
+    { daysAgo: 12, amount: 15.00, category: 'other',   note: 'Car wash' },
+  ]
+
+  for (const entry of expenseHistory) {
+    const d = new Date()
+    d.setDate(d.getDate() - entry.daysAgo)
+    await prisma.expenseEntry.create({
+      data: {
+        userId: user.id,
+        amount: entry.amount,
+        category: entry.category,
+        note: entry.note,
+        date: d,
+      }
+    })
+  }
+  console.log('Created', expenseHistory.length, 'expense entries')
 
   // ─── INSURANCE RECOMMENDATIONS ──────────────────────────────────
   const recommendations = [
