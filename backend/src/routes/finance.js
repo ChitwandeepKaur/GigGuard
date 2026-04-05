@@ -1,8 +1,8 @@
 import express from 'express';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../db.js';
+
 import { calcSafeToSpend, calcBufferWeeks, calcSEtaxReserve, calcWindfall, getSafeToSpendState, getNextTaxDeadline, getBufferTier, calcTaxPenalty } from '../services/calculations.js';
 
-const prisma = new PrismaClient();
 const router = express.Router();
 
 function isThisWeek(date) {

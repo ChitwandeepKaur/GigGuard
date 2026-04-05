@@ -1,10 +1,10 @@
 import express from 'express';
 import { createClient } from '@supabase/supabase-js';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../db.js';
+
 import bcrypt from 'bcryptjs';
 
 const router = express.Router();
-const prisma = new PrismaClient();
 
 const supabase = createClient(
   process.env.SUPABASE_URL || 'https://placeholder.supabase.co',

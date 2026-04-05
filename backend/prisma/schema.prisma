@@ -3,137 +3,113 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model User {
-  id            String   @id @default(uuid())
-  email         String   @unique
-  password_hash String?  // Added password_hash
-  created_at    DateTime @default(now())
-  updated_at    DateTime @updatedAt
-
-  profile         UserProfile?
-  income_log      IncomeEntry[]
+  id              String                    @id @default(uuid())
+  email           String                    @unique
+  password_hash   String?
+  created_at      DateTime                  @default(now())
+  updated_at      DateTime                  @updatedAt
+  expense_log     ExpenseEntry[]
   expenses        ExpenseProfile?
+  income_log      IncomeEntry[]
   insurance       InsurancePolicy?
   recommendations InsuranceRecommendation[]
-  expense_log     ExpenseEntry[]
+  profile         UserProfile?
 }
 
 model UserProfile {
   id               String   @id @default(uuid())
   userId           String   @unique
-  user             User     @relation(fields: [userId], references: [id])
-
   gig_types        String[] @default([])
   income_frequency String   @default("weekly")
   weekly_low       Float    @default(0)
   weekly_high      Float    @default(0)
   worst_week       Float    @default(0)
   best_week        Float    @default(0)
-
-  floor_income     Float    @default(0) // computed
-  average_income   Float    @default(0) // computed
-  volatility_score Float    @default(0) // computed
-
+  floor_income     Float    @default(0)
+  average_income   Float    @default(0)
+  volatility_score Float    @default(0)
   available_cash   Float    @default(0)
   current_buffer   Float    @default(0)
-
   created_at       DateTime @default(now())
   updated_at       DateTime @updatedAt
+  user             User     @relation(fields: [userId], references: [id])
 }
 
 model ExpenseProfile {
-  id              String  @id @default(uuid())
-  userId          String  @unique
-  user            User    @relation(fields: [userId], references: [id])
-
-  // Non-negotiables
-  rent            Float   @default(0)
-  utilities       Float   @default(0)
-  debt_minimums   Float   @default(0)
-  transport       Float   @default(0)
-  groceries       Float   @default(0)
-  insurance_cost  Float   @default(0)
-
-  // Semi-flexible
-  phone           Float   @default(0)
-  subscriptions   Float   @default(0)
-
-  // Fully flexible
-  eating_out      Float   @default(0)
-  shopping        Float   @default(0)
-  entertainment   Float   @default(0)
-
-  survival_number Float   @default(0) // computed: sum of non-negotiable / 4.33
-
+  id              String   @id @default(uuid())
+  userId          String   @unique
+  rent            Float    @default(0)
+  utilities       Float    @default(0)
+  debt_minimums   Float    @default(0)
+  transport       Float    @default(0)
+  groceries       Float    @default(0)
+  insurance_cost  Float    @default(0)
+  phone           Float    @default(0)
+  subscriptions   Float    @default(0)
+  eating_out      Float    @default(0)
+  shopping        Float    @default(0)
+  entertainment   Float    @default(0)
+  survival_number Float    @default(0)
   updated_at      DateTime @updatedAt
+  user            User     @relation(fields: [userId], references: [id])
 }
 
 model IncomeEntry {
   id         String   @id @default(uuid())
   userId     String
-  user       User     @relation(fields: [userId], references: [id])
-
   amount     Float
-  date       DateTime @default(now())
-  week_of    DateTime // start of the week this income belongs to
-  source     String   // "doordash" | "uber" | "freelance" etc.
+  week_of    DateTime
+  source     String
   note       String?
-
   created_at DateTime @default(now())
+  date       DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id])
 }
 
 model ExpenseEntry {
   id         String   @id @default(uuid())
   userId     String
-  user       User     @relation(fields: [userId], references: [id])
-
   amount     Float
   date       DateTime @default(now())
-  category   String   // "gas" | "food" | "supplies" | "other"
+  category   String
   note       String?
-
   created_at DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id])
 }
 
 model InsurancePolicy {
-  id              String   @id @default(uuid())
-  userId          String   @unique
-  user            User     @relation(fields: [userId], references: [id])
-
+  id              String    @id @default(uuid())
+  userId          String    @unique
   file_name       String
-  file_url        String   // Supabase Storage URL
-  extracted_text  String?  // raw PDF text (used for AI calls)
-
-  // AI-generated summary
-  covered         String[] @default([])
-  not_covered     String[] @default([])
+  file_url        String
+  extracted_text  String?
+  covered         String[]  @default([])
+  not_covered     String[]  @default([])
   deductible      String?
   limits          String?
   renewal_date    String?
-
-  // Quiz
-  quiz_questions  Json?    // array of generated questions
+  quiz_questions  Json?
   last_quiz_score Int?
   last_quiz_date  DateTime?
-
-  created_at      DateTime @default(now())
-  updated_at      DateTime @updatedAt
+  created_at      DateTime  @default(now())
+  updated_at      DateTime  @updatedAt
+  user            User      @relation(fields: [userId], references: [id])
 }
 
 model InsuranceRecommendation {
   id              String   @id @default(uuid())
   userId          String
-  user            User     @relation(fields: [userId], references: [id])
-
   product         String
   reason          String
-  priority        String   // "high" | "medium" | "low"
+  priority        String
   gap_description String
-
   created_at      DateTime @default(now())
   updated_at      DateTime @updatedAt
+  user            User     @relation(fields: [userId], references: [id])
 }

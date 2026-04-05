@@ -8,6 +8,8 @@ import insuranceRoutes from './routes/insurance.js'
 import aiRoutes from './routes/ai.js'
 import { errorHandler } from './middleware/errorHandler.js'
 import { authenticate } from './middleware/auth.js'
+import { checkConnection } from './db.js'
+
 
 
 const app = express()
@@ -25,6 +27,9 @@ app.use('/api/ai', aiRoutes) // Public for now for easy RAG testing
 
 
 app.use(errorHandler)
+
+// Check DB Connection on Start
+checkConnection()
 
 app.listen(process.env.PORT || 3001, () => {
   console.log(`GigShield server running on port ${process.env.PORT || 3001}`)
