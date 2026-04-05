@@ -1,7 +1,7 @@
 import express from 'express'
 import multer from 'multer'
 import { extractPDFText } from '../services/pdfParser.js'
-import { chatWithPolicyContext, summarizePolicy, generateQuizQuestions, getInsuranceRecommendation } from '../services/gemini.js'
+import { chatWithPolicyContext, summarizePolicy, generateQuizQuestions, getInsuranceRecommendation, generatePolicyComparison } from '../services/gemini.js'
 
 const router = express.Router()
 const upload = multer({ storage: multer.memoryStorage() })
@@ -53,6 +53,21 @@ router.post('/recommendation/preview', async (req, res) => {
   } catch (err) {
     console.error('Failed to get recommendation preview:', err)
     res.status(500).json({ error: 'Failed to generate recommendations' })
+  }
+})
+
+// 4.5 — Policy Comparison
+router.post('/compare-policy', async (req, res) => {
+  const { policyText, gigType } = req.body
+  if (!policyText) return res.status(400).json({ error: 'Missing policyText' })
+
+  try {
+    const comparison = await generatePolicyComparison(policyText, gigType)
+    if (!comparison) throw new Error('Comparison generation failed')
+    res.json({ comparison })
+  } catch (err) {
+    console.error('Error generating comparison:', err)
+    res.status(500).json({ error: 'Error generating comparison matrix' })
   }
 })
 

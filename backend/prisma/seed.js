@@ -28,7 +28,7 @@ async function main() {
   );
 
   let userId;
-  const demoEmail = 'marcus_demo@gigguard.app';
+  const demoEmail = 'marcus@demo.com';
   const demoPassword = 'demo1234';
 
   const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
@@ -225,7 +225,7 @@ async function main() {
 
   // ─── SUMMARY ────────────────────────────────────────────────────
   console.log('\n--- Seed complete ---')
-  console.log('Login:    marcus_demo@gigguard.app / demo1234')
+  console.log('Login:    marcus@demo.com / demo1234')
   console.log('Profile:  DoorDash + Uber, weekly $800–$1,800')
   console.log('Survival: $' + survivalNumber.toFixed(0) + '/week')
   console.log('Buffer:   ~1.7 bad weeks covered')

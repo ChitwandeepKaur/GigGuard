@@ -47,7 +47,8 @@ Important rules:
 1. EXTREME BREVITY: Maximum 4 bullets per category (isCovered, notCovered, hiddenTerms).
 2. PUNCHY & LEGIBLE: Maximum 6 to 8 words per bullet point. Do not use full sentences. Cut all legal jargon. It must be highly scanable for a quick UI dashboard.
 3. Focus on things critical for gig workers.
-4. If deductible, limits, or renewal date are not explicitly stated, output exactly "Not specified in document". Do NOT hallucinate data.`
+4. If deductible, limits, or renewal date are not explicitly stated, output exactly "Not specified in document". Do NOT hallucinate data.
+5. STRICT JSON: Your output must be 100% valid JSON. Do not include trailing commas or unquoted strings like N/A.`
 
   const prompt = `${systemInstruction}\n\n--- POLICY DOCUMENT ---\n${policyText}`
 
@@ -144,5 +145,41 @@ ${policyText.slice(0, 8000)}`
   } catch (error) {
     console.error('Error generating quiz questions with Gemini:', error)
     throw new Error('Failed to generate quiz questions')
+  }
+}
+
+// 4.5 — Policy Comparison Matrix
+export async function generatePolicyComparison(policyText, gigType = 'gig worker') {
+  const model = getModel(true)
+  const systemInstruction = `You are a financial and insurance advisor for gig workers.
+Your task is to generate a comparison matrix comparing the user's uploaded policy against two recommended products: "State Farm Rideshare Endorsement" and "State Farm Commercial Auto".
+
+Analyze the provided policy text and output a strict JSON array comparing typical gig-worker scenarios. 
+Output exactly 5 rows (features). 
+For each policy, value MUST be exactly one of: "covered", "not_covered", or "partial".
+
+Output JSON schema must strictly match this array structure:
+[
+  {
+    "feature": "Personal Driving (App Off)",
+    "userPolicy": "covered",
+    "ridesharePolicy": "covered",
+    "commercialPolicy": "covered"
+  },
+  ...
+]
+
+Do not hallucinate the user's policy coverage. If it is a personal auto policy, it almost explicitly excludes commercial or livery gig work. Be realistic and highlight the gaps.`
+
+  const prompt = `${systemInstruction}\n\n--- UPLOADED POLICY DOCUMENT ---\n${policyText.slice(0, 10000)}`
+
+  try {
+    const result = await model.generateContent(prompt)
+    const response = await result.response
+    const parsed = JSON.parse(response.text())
+    return Array.isArray(parsed) ? parsed : null
+  } catch (error) {
+    console.error('Error generating policy comparison:', error)
+    return null
   }
 }

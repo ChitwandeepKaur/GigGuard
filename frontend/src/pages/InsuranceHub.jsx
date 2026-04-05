@@ -8,6 +8,22 @@ export default function InsuranceHub() {
   const { setPolicyText, policyText, policySummary, setPolicySummary } = useStore();
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState(null);
+  
+  const [comparisonData, setComparisonData] = useState(null);
+  const [isComparing, setIsComparing] = useState(false);
+
+  const fetchComparison = async (text) => {
+    setIsComparing(true);
+    setComparisonData(null);
+    try {
+      const res = await api.post('/api/ai/compare-policy', { policyText: text, gigType: 'rideshare/delivery' });
+      setComparisonData(res.data.comparison);
+    } catch (err) {
+      console.error('Comparison fetch failed', err);
+    } finally {
+      setIsComparing(false);
+    }
+  };
 
   const handleFileUpload = async (event) => {
     const file = event.target.files?.[0];
@@ -27,6 +43,10 @@ export default function InsuranceHub() {
       });
       setPolicyText(res.data.extractedText);
       setPolicySummary(res.data.summary);
+      
+      // Trigger waterfall loading of comparison table with a slight delay to avoid burst rate limits
+      setIsComparing(true);
+      setTimeout(() => fetchComparison(res.data.extractedText), 2000);
     } catch (err) {
       console.error(err);
       setError('Failed to process policy document');
@@ -147,7 +167,53 @@ export default function InsuranceHub() {
                </div>
             </div>
             
-            <div className="mt-6 bg-brand/10 border border-brand/20 p-4 rounded-xl flex items-start gap-3">
+            {/* Coverage Comparison Table */}
+            <div className="mt-10">
+               <div className="flex items-center justify-between mb-4">
+                 <h4 className="text-lg font-medium text-app-text">Coverage Comparison</h4>
+               </div>
+               
+               {isComparing ? (
+                 <div className="bg-surface border border-border rounded-xl p-8 flex flex-col items-center justify-center space-y-4">
+                   <Loader2 className="animate-spin text-brand" size={32} />
+                   <p className="text-sm text-app-muted animate-pulse">Running matrix comparison against State Farm products...</p>
+                 </div>
+               ) : comparisonData ? (
+                 <div className="overflow-x-auto border border-border rounded-xl">
+                   <table className="w-full text-left text-sm border-collapse">
+                     <thead>
+                       <tr className="border-b border-border bg-app-bg text-app-muted">
+                         <th className="font-medium p-4 font-mono uppercase tracking-widest text-[10px]">Scenario</th>
+                         <th className="font-medium p-4 font-mono uppercase tracking-widest text-[10px] border-l border-border">Your Uploaded Policy</th>
+                         <th className="font-medium p-4 font-mono uppercase tracking-widest text-[10px] bg-brand/5 border-l border-brand/20">State Farm Rideshare</th>
+                         <th className="font-medium p-4 font-mono uppercase tracking-widest text-[10px] bg-brand/10 border-l border-brand/30 text-brand">
+                             Commercial Auto <span className="ml-2 inline-flex items-center gap-1 bg-brand text-white px-2 py-0.5 rounded-full text-[8px] font-bold">BEST MATCH</span>
+                         </th>
+                       </tr>
+                     </thead>
+                     <tbody className="divide-y divide-border bg-surface">
+                       {comparisonData.map((row, idx) => {
+                         const renderIcon = (status) => {
+                           if (status === 'covered') return <span className="flex items-center gap-1.5 text-green-500 font-medium"><CheckCircle size={16}/> Covered</span>;
+                           if (status === 'not_covered') return <span className="flex items-center gap-1.5 text-red-500 font-medium"><XCircle size={16}/> Gap</span>;
+                           return <span className="flex items-center gap-1.5 text-amber-500 font-medium"><AlertTriangle size={16}/> Partial</span>;
+                         };
+                         return (
+                           <tr key={idx} className="hover:bg-app-bg transition-colors">
+                             <td className="p-4 font-medium text-app-text">{row.feature}</td>
+                             <td className="p-4 border-l border-border">{renderIcon(row.userPolicy)}</td>
+                             <td className="p-4 bg-brand/5 border-l border-brand/10">{renderIcon(row.ridesharePolicy)}</td>
+                             <td className="p-4 bg-brand/10 border-l border-brand/20">{renderIcon(row.commercialPolicy)}</td>
+                           </tr>
+                         );
+                       })}
+                     </tbody>
+                   </table>
+                 </div>
+               ) : null}
+            </div>
+            
+            <div className="mt-8 bg-brand/10 border border-brand/20 p-4 rounded-xl flex items-start gap-3">
                <div className="bg-brand text-white p-2 rounded-full shrink-0">
                  <ShieldCheck size={18} />
                </div>
