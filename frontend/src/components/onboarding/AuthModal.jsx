@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Eye, EyeOff } from 'lucide-react';
 import Card from '../ui/Card';
 import Button from '../ui/Button';
 import useAuthStore from '../../store/useAuthStore';
@@ -8,6 +9,7 @@ export default function AuthModal({ onComplete, onClose, isSubmitting }) {
   const [isLogin, setIsLogin] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const { setAuth } = useAuthStore();
@@ -59,14 +61,23 @@ export default function AuthModal({ onComplete, onClose, isSubmitting }) {
             onChange={(e) => setEmail(e.target.value)}
             required
           />
-          <input 
-            type="password" 
-            placeholder="Secure Password"
-            className="w-full !rounded-[12px] border-app-border p-3 focus:border-brand focus:ring-1 focus:ring-brand outline-none"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
+          <div className="relative">
+            <input 
+              type={showPassword ? "text" : "password"} 
+              placeholder="Secure Password"
+              className="w-full !rounded-[12px] border-app-border p-3 pr-10 focus:border-brand focus:ring-1 focus:ring-brand outline-none"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+            <button
+              type="button"
+              className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-brand transition-colors"
+              onClick={() => setShowPassword(!showPassword)}
+            >
+              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+            </button>
+          </div>
           {error && <p className="text-danger text-xs italic font-body">{error}</p>}
           
           <Button 

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Eye, EyeOff } from 'lucide-react';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import api from '../services/api';
@@ -8,7 +9,9 @@ export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
@@ -100,14 +103,23 @@ export default function Auth() {
           </div>
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-1">Password <span className="text-danger">*</span></label>
-            <input 
-              type="password" 
-              required
-              className="w-full p-3 border border-gray-200 bg-gray-50 rounded-lg focus:ring-2 focus:ring-brand focus:border-transparent outline-none transition-all"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-            />
+            <div className="relative">
+              <input 
+                type={showPassword ? "text" : "password"} 
+                required
+                className="w-full p-3 pr-10 border border-gray-200 bg-gray-50 rounded-lg focus:ring-2 focus:ring-brand focus:border-transparent outline-none transition-all"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+              />
+              <button
+                type="button"
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-brand transition-colors"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
+            </div>
             {!isLogin && (
               <ul className="text-xs mt-3 space-y-1 font-medium">
                 <li className={`flex items-center transition-colors ${password.length >= 8 ? 'text-green-600' : 'text-app-muted'}`}>
@@ -126,14 +138,23 @@ export default function Auth() {
           {!isLogin && (
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-1">Confirm Password <span className="text-danger">*</span></label>
-              <input 
-                type="password" 
-                required
-                className="w-full p-3 border border-gray-200 bg-gray-50 rounded-lg focus:ring-2 focus:ring-brand focus:border-transparent outline-none transition-all"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="••••••••"
-              />
+              <div className="relative">
+                <input 
+                  type={showConfirmPassword ? "text" : "password"} 
+                  required
+                  className="w-full p-3 pr-10 border border-gray-200 bg-gray-50 rounded-lg focus:ring-2 focus:ring-brand focus:border-transparent outline-none transition-all"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="••••••••"
+                />
+                <button
+                  type="button"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-brand transition-colors"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                >
+                  {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
             </div>
           )}
 
