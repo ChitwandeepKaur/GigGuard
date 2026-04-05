@@ -16,15 +16,9 @@ export function calcWeeklySurvivalNumber(nonNegotiableExpenses) {
   return total / 4.33
 }
 
-export function calcSEtaxReserve(weeklyIncome) {
-  // 15.3% of net earnings (approximated on weekly income)
-  return weeklyIncome * 0.153 * 0.9
-}
-
-export function calcSafeToSpend({ availableCash, billsDueThisWeek, emergencyBufferTarget, currentBuffer, weeklyTaxReserve, volatilityScore }) {
-  const bufferGap = Math.max(0, emergencyBufferTarget - currentBuffer)
+export function calcSafeToSpend({ availableCash, billsDueThisWeek, volatilityScore }) {
   const volatilityCushion = availableCash * (volatilityScore / 1000)
-  return availableCash - billsDueThisWeek - bufferGap - weeklyTaxReserve - volatilityCushion
+  return availableCash - billsDueThisWeek - volatilityCushion
 }
 
 export function getSafeToSpendState(safeAmount, survivalNumber, avgFlexible = 150) {
@@ -45,25 +39,6 @@ export function getBufferTier(weeks) {
   return 'protected'
 }
 
-export function calcTaxPenalty(totalOwed, overdueDays = 0) {
-  // simple 0.5% per month penalty approximation for demo
-  if (overdueDays <= 0) return 0
-  const months = Math.ceil(overdueDays / 30)
-  return totalOwed * 0.005 * months
-}
-
-export function getNextTaxDeadline() {
-  const now = new Date()
-  const year = now.getFullYear()
-  const deadlines = [
-    new Date(year, 0, 15), // Jan 15 (last year Q4)
-    new Date(year, 3, 15), // Apr 15
-    new Date(year, 5, 15), // Jun 15
-    new Date(year, 8, 15), // Sep 15
-    new Date(year + 1, 0, 15), // Jan 15 (next year Q4)
-  ]
-  return deadlines.find(d => d > now) || deadlines[0]
-}
 
 export function calcWindfall(currentWeekIncome, goodWeekThreshold) {
   const excess = currentWeekIncome - goodWeekThreshold

@@ -3,7 +3,6 @@ import { Settings } from 'lucide-react';
 import api from '../services/api';
 import SafeToSpendWidget from '../components/dashboard/SafeToSpendWidget';
 import BufferHealthTracker from '../components/dashboard/BufferHealthTracker';
-import TaxTracker from '../components/dashboard/TaxTracker';
 import WindfallStabilizer from '../components/dashboard/WindfallStabilizer';
 import TransactionModal from '../components/dashboard/TransactionModal';
 import TriageModal from '../components/dashboard/TriageModal';
@@ -227,12 +226,7 @@ export default function Dashboard() {
             onUpdate={fetchData}
           />
           
-          <TaxTracker 
-            owed={summary?.totalTaxOwed}
-            deadline={summary?.nextTaxDeadline}
-            penalty={summary?.estimatedPenalty}
-          />
-          
+
           <MonthlyBills 
             expenses={summary?.expenses} 
             onUpdate={fetchData} 

@@ -15,7 +15,7 @@ const LABELS = {
   danger: 'Overspending danger',
 };
 
-export default function SafeToSpendWidget({ amount, state, billsDue, availableCash, currentWeek, taxReserve = 0, bufferGap = 0 }) {
+export default function SafeToSpendWidget({ amount, state, billsDue, availableCash, currentWeek, bufferGap = 0 }) {
   const [showMath, setShowMath] = useState(false);
   
   const bgColor = COLORS[state] || COLORS.safe;
@@ -24,7 +24,7 @@ export default function SafeToSpendWidget({ amount, state, billsDue, availableCa
   // Math breakdown logic
   // SafeToSpend = Cash - Bills - BufferGap - TaxReserve - (Volatility cushion logic inside server)
   // We'll just show a simplified breakdown using available props
-  const cushion = (availableCash || 0) - (billsDue || 0) - bufferGap - taxReserve - (amount || 0);
+  const cushion = (availableCash || 0) - (billsDue || 0) - bufferGap - (amount || 0);
 
   return (
     <div className={`${bgColor} p-8 rounded-card shadow-xl transition-all duration-300 transform hover:scale-[1.01]`}>
@@ -79,7 +79,6 @@ export default function SafeToSpendWidget({ amount, state, billsDue, availableCa
           <div className="mt-4 p-4 bg-black/10 rounded-md font-mono text-xs space-y-2 animate-in slide-in-from-top-2 duration-200">
             <div className="flex justify-between"><span>Cash on Hand:</span> <span>${availableCash?.toLocaleString()}</span></div>
             <div className="flex justify-between text-white/80"><span>- Bills Due:</span> <span>${billsDue?.toLocaleString()}</span></div>
-            <div className="flex justify-between text-white/80"><span>- Tax Reserve:</span> <span>${taxReserve?.toLocaleString()}</span></div>
             <div className="flex justify-between text-white/80"><span>- Volatility Cushion:</span> <span>${cushion > 0 ? cushion.toLocaleString() : '0.00'}</span></div>
             <div className="flex justify-between font-bold pt-2 border-t border-white/20 mt-2">
               <span>= Safe to Spend:</span> 

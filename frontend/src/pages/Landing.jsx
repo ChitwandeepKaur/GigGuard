@@ -27,7 +27,7 @@ export default function Landing() {
           </h1>
           
           <p className="text-base sm:text-lg lg:text-xl text-app-muted max-w-xl mx-auto lg:mx-0 font-body leading-relaxed">
-            Stop stressing over irregular income. GigGuard automatically tracks your taxes, builds your safety net, and analyzes confusing insurance policies using AI.
+            Stop stressing over irregular income. GigGuard automatically builds your safety net, smooths your variable pay, and analyzes confusing insurance policies using AI.
           </p>
           
           <div className="flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start pt-4">

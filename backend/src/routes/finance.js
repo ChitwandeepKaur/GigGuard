@@ -1,7 +1,7 @@
 import express from 'express';
 import { prisma } from '../db.js';
 
-import { calcSafeToSpend, calcBufferWeeks, calcSEtaxReserve, calcWindfall, getSafeToSpendState, getNextTaxDeadline, getBufferTier, calcTaxPenalty } from '../services/calculations.js';
+import { calcSafeToSpend, calcBufferWeeks, calcWindfall, getSafeToSpendState, getBufferTier } from '../services/calculations.js';
 
 const router = express.Router();
 
@@ -160,7 +160,7 @@ router.get('/summary', async (req, res, next) => {
       .filter(e => isThisWeek(e.week_of))
       .reduce((sum, e) => sum + e.amount, 0);
 
-    const taxReserve = calcSEtaxReserve(thisWeekIncome);
+
     
     // Calculate actual bills due (sum of categories not in paid_categories)
     const paidSet = new Set(expenses.paid_categories);
@@ -179,9 +179,6 @@ router.get('/summary', async (req, res, next) => {
     const safeToSpend = calcSafeToSpend({
       availableCash: profile.available_cash,
       billsDueThisWeek: billsDueThisWeek,
-      emergencyBufferTarget: emergencyBufferTarget,
-      currentBuffer: profile.current_buffer,
-      weeklyTaxReserve: taxReserve,
       volatilityScore: profile.volatility_score
     });
 
@@ -189,8 +186,6 @@ router.get('/summary', async (req, res, next) => {
     const windfall = thisWeekIncome > profile.best_week
       ? calcWindfall(thisWeekIncome, profile.best_week) : null;
 
-    const totalTaxOwed = recentIncome.reduce((s, e) => s + (e.amount * 0.153 * 0.9), 0);
-    const nextDeadline = getNextTaxDeadline();
 
     const dayOfMonth = now.getDate();
     const currentWeek = Math.min(4, Math.ceil(dayOfMonth / 7));
@@ -204,10 +199,6 @@ router.get('/summary', async (req, res, next) => {
       bufferTier: getBufferTier(bufferWeeks),
       emergencyBufferTarget,
       billsDueThisWeek,
-      taxReserve,
-      totalTaxOwed,
-      estimatedPenalty: calcTaxPenalty(totalTaxOwed, 0),
-      nextTaxDeadline: nextDeadline,
       windfall,
       goodWeekThreshold: profile.best_week,
       floorIncome: profile.floor_income,
