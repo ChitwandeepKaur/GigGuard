@@ -186,4 +186,41 @@ router.get('/summary', async (req, res, next) => {
   }
 });
 
+router.post('/transfer-to-buffer', async (req, res, next) => {
+  try {
+    const { amount } = req.body;
+    const numAmount = Number(amount);
+
+    if (isNaN(numAmount) || numAmount <= 0) {
+      return res.status(400).json({ error: 'Invalid transfer amount' });
+    }
+
+    const profile = await prisma.userProfile.findUnique({
+      where: { userId: req.userId }
+    });
+
+    if (!profile) {
+      return res.status(404).json({ error: 'User profile not found' });
+    }
+
+    if (profile.available_cash < numAmount) {
+      return res.status(400).json({ error: 'Insufficient available cash' });
+    }
+
+    await prisma.$transaction([
+      prisma.userProfile.update({
+        where: { userId: req.userId },
+        data: {
+          available_cash: { decrement: numAmount },
+          current_buffer: { increment: numAmount }
+        }
+      })
+    ]);
+
+    res.json({ success: true, message: `Transferred $${numAmount} to emergency buffer.` });
+  } catch (error) {
+    next(error);
+  }
+});
+
 export default router;

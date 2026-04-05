@@ -144,6 +144,7 @@ export default function Dashboard() {
             weeks={summary?.bufferWeeks} 
             currentBuffer={summary?.currentBuffer}
             targetBuffer={summary?.emergencyBufferTarget}
+            onUpdate={fetchData}
           />
           
           <TaxTracker 
