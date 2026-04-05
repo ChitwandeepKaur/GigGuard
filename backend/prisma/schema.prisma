@@ -19,6 +19,7 @@ model User {
   expenses        ExpenseProfile?
   insurance       InsurancePolicy?
   recommendations InsuranceRecommendation[]
+  expense_log     ExpenseEntry[]
 }
 
 model UserProfile {
@@ -77,8 +78,22 @@ model IncomeEntry {
   user       User     @relation(fields: [userId], references: [id])
 
   amount     Float
+  date       DateTime @default(now())
   week_of    DateTime // start of the week this income belongs to
   source     String   // "doordash" | "uber" | "freelance" etc.
+  note       String?
+
+  created_at DateTime @default(now())
+}
+
+model ExpenseEntry {
+  id         String   @id @default(uuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+
+  amount     Float
+  date       DateTime @default(now())
+  category   String   // "gas" | "food" | "supplies" | "other"
   note       String?
 
   created_at DateTime @default(now())

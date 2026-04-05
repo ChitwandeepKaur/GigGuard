@@ -29,17 +29,79 @@ router.get('/income', async (req, res, next) => {
 
 router.post('/income', async (req, res, next) => {
   try {
-    const { amount, source, note, week_of } = req.body;
-    const entry = await prisma.incomeEntry.create({
-      data: {
-        userId: req.userId,
-        amount: Number(amount),
-        source: source || 'other',
-        note: note || '',
-        week_of: week_of ? new Date(week_of) : new Date(),
-      }
-    });
+    const { amount, source, note, date, week_of } = req.body;
+    const numAmount = Number(amount);
+    
+    // Create income entry and update user profile in a transaction
+    const [entry] = await prisma.$transaction([
+      prisma.incomeEntry.create({
+        data: {
+          userId: req.userId,
+          amount: numAmount,
+          source: source || 'other',
+          note: note || '',
+          date: date ? new Date(date) : new Date(),
+          week_of: week_of ? new Date(week_of) : new Date(),
+        }
+      }),
+      prisma.userProfile.update({
+        where: { userId: req.userId },
+        data: { available_cash: { increment: numAmount } }
+      })
+    ]);
     res.json(entry);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post('/expense', async (req, res, next) => {
+  try {
+    const { amount, category, note, date } = req.body;
+    const numAmount = Number(amount);
+
+    const [entry] = await prisma.$transaction([
+      prisma.expenseEntry.create({
+        data: {
+          userId: req.userId,
+          amount: numAmount,
+          category: category || 'other',
+          note: note || '',
+          date: date ? new Date(date) : new Date(),
+        }
+      }),
+      prisma.userProfile.update({
+        where: { userId: req.userId },
+        data: { available_cash: { decrement: numAmount } }
+      })
+    ]);
+    res.json(entry);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get('/transactions', async (req, res, next) => {
+  try {
+    const [income, expenses] = await Promise.all([
+      prisma.incomeEntry.findMany({
+        where: { userId: req.userId },
+        orderBy: { date: 'desc' },
+        take: 20
+      }),
+      prisma.expenseEntry.findMany({
+        where: { userId: req.userId },
+        orderBy: { date: 'desc' },
+        take: 20
+      })
+    ]);
+
+    const all = [
+      ...income.map(i => ({ ...i, type: 'income' })),
+      ...expenses.map(e => ({ ...e, type: 'expense' }))
+    ].sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    res.json(all.slice(0, 30));
   } catch (error) {
     next(error);
   }
