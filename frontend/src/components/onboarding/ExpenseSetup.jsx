@@ -2,7 +2,7 @@ import React from 'react';
 import Card from '../ui/Card';
 import Button from '../ui/Button';
 
-export default function ExpenseSetup({ formData, setFormData, onNext, onBack }) {
+export default function ExpenseSetup({ formData, setFormData, onNext, onBack, hideNavigation = false }) {
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
@@ -40,7 +40,7 @@ export default function ExpenseSetup({ formData, setFormData, onNext, onBack }) 
         </div>
       </div>
 
-      <div className="p-6 space-y-8 max-h-[60vh] overflow-y-auto">
+      <div className={`p-6 space-y-8 ${hideNavigation ? '' : 'max-h-[60vh] overflow-y-auto'}`}>
         <section className="bg-danger/5 p-5 rounded-xl border border-danger/10">
           <h3 className="font-bold text-danger mb-1 text-lg flex items-center"><span className="mr-2">🚨</span> 1. Non-Negotiables (Monthly)</h3>
           <p className="text-sm text-danger/80 mb-4 font-medium">Things you absolutely must pay to survive.</p>
@@ -89,17 +89,19 @@ export default function ExpenseSetup({ formData, setFormData, onNext, onBack }) 
         </section>
       </div>
 
-      <div className="p-6 bg-gray-50 border-t border-gray-100">
-        {!isFormValid() && (
-          <p className="text-sm text-gray-500 mb-3 text-center">Please fill out core required expenses (*) to continue.</p>
-        )}
-        <div className="flex flex-col sm:flex-row gap-4">
-          <Button variant="secondary" onClick={onBack} className="w-full sm:w-1/3 py-3">Back</Button>
-          <Button onClick={onNext} disabled={!isFormValid()} className="w-full sm:w-2/3 py-3 shadow-md disabled:opacity-50 disabled:cursor-not-allowed">
-            Calculate Profile
-          </Button>
+      {!hideNavigation && (
+        <div className="p-6 bg-gray-50 border-t border-gray-100">
+          {!isFormValid() && (
+            <p className="text-sm text-gray-500 mb-3 text-center">Please fill out core required expenses (*) to continue.</p>
+          )}
+          <div className="flex flex-col sm:flex-row gap-4">
+            <Button variant="secondary" onClick={onBack} className="w-full sm:w-1/3 py-3">Back</Button>
+            <Button onClick={onNext} disabled={!isFormValid()} className="w-full sm:w-2/3 py-3 shadow-md disabled:opacity-50 disabled:cursor-not-allowed">
+              Calculate Profile
+            </Button>
+          </div>
         </div>
-      </div>
+      )}
     </Card>
   );
 }

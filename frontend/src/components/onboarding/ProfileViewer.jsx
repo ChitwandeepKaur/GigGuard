@@ -106,6 +106,18 @@ export default function ProfileViewer({ profileData, onEdit }) {
                   <p className="font-bold text-emerald-600">${profileData.best_week}</p>
                </div>
             </div>
+            
+            {(profileData.available_cash !== undefined && profileData.available_cash !== '') && (
+              <div className="mt-2 bg-brand/5 p-3 rounded-md border border-brand/10 flex justify-between items-center">
+                 <div>
+                    <p className="text-[10px] sm:text-xs uppercase font-mono text-brand mb-1 font-bold">Available Savings</p>
+                    <p className="text-xs text-brand/70">Current cash buffer</p>
+                 </div>
+                 <div className="text-right">
+                    <p className="text-lg font-bold text-brand">${profileData.available_cash}</p>
+                 </div>
+              </div>
+            )}
           </div>
         </Card>
 

@@ -2,7 +2,7 @@ import React from 'react';
 import Card from '../ui/Card';
 import Button from '../ui/Button';
 
-export default function IncomeProfiler({ formData, setFormData, onNext }) {
+export default function IncomeProfiler({ formData, setFormData, onNext, hideNavigation = false }) {
   const handleGigToggle = (type) => {
     setFormData(prev => {
       const types = prev.gig_types.includes(type)
@@ -18,7 +18,9 @@ export default function IncomeProfiler({ formData, setFormData, onNext }) {
       formData.weekly_low !== '' &&
       formData.weekly_high !== '' &&
       formData.worst_week !== '' &&
-      formData.best_week !== ''
+      formData.best_week !== '' &&
+      formData.available_cash !== '' &&
+      formData.available_cash !== undefined
     );
   };
 
@@ -87,14 +89,27 @@ export default function IncomeProfiler({ formData, setFormData, onNext }) {
           </div>
         </div>
 
-        <div className="mt-8">
-          {!isFormValid() && (
-            <p className="text-sm text-gray-500 mb-3 text-center">Please fill out all required fields (*) to continue.</p>
-          )}
-          <Button onClick={onNext} disabled={!isFormValid()} className="w-full shadow-sm disabled:opacity-50 disabled:cursor-not-allowed">
-            Continue to Expenses
-          </Button>
+        <div>
+          <label className="block text-sm font-medium mb-1 text-gray-700">Current Savings / Buffer Cash ($) <span className="text-danger">*</span></label>
+          <p className="text-xs text-brand/70 mb-2">This helps GigGuard evaluate your current protection against bad weeks.</p>
+          <div className="bg-brand/5 border border-brand/10 p-3 rounded-lg max-w-sm">
+            <input type="number" className="w-full bg-white border border-brand/20 p-2 rounded-md outline-none focus:border-brand focus:ring-1 focus:ring-brand transition-all" 
+              placeholder="e.g. 1500"
+              value={formData.available_cash !== undefined ? formData.available_cash : ''} 
+              onChange={e => setFormData({...formData, available_cash: e.target.value})} />
+          </div>
         </div>
+
+        {!hideNavigation && (
+          <div className="mt-8">
+            {!isFormValid() && (
+              <p className="text-sm text-gray-500 mb-3 text-center">Please fill out all required fields (*) to continue.</p>
+            )}
+            <Button onClick={onNext} disabled={!isFormValid()} className="w-full shadow-sm disabled:opacity-50 disabled:cursor-not-allowed">
+              Continue to Expenses
+            </Button>
+          </div>
+        )}
       </div>
     </Card>
   );

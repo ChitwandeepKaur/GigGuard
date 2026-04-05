@@ -19,7 +19,7 @@ router.post('/profile', async (req, res, next) => {
     const { 
       gig_types, income_frequency, weekly_low, weekly_high, worst_week, best_week,
       rent, utilities, debt_minimums, transport, groceries, insurance_cost,
-      phone, subscriptions, eating_out, shopping, entertainment
+      phone, subscriptions, eating_out, shopping, entertainment, available_cash
     } = req.body;
     
     const profile = await prisma.userProfile.upsert({
@@ -33,7 +33,9 @@ router.post('/profile', async (req, res, next) => {
         best_week: Number(best_week || 0),
         floor_income: Number(worst_week || 0),
         average_income: (Number(weekly_low || 0) + Number(weekly_high || 0)) / 2,
-        volatility_score: ((Number(weekly_high || 0) - Number(weekly_low || 0)) / ((Number(weekly_low || 0) + Number(weekly_high || 0)) / 2 || 1)) * 100
+        volatility_score: ((Number(weekly_high || 0) - Number(weekly_low || 0)) / ((Number(weekly_low || 0) + Number(weekly_high || 0)) / 2 || 1)) * 100,
+        available_cash: Number(available_cash || 0),
+        current_buffer: Number(available_cash || 0)
       },
       create: {
         userId: req.userId,
@@ -45,7 +47,9 @@ router.post('/profile', async (req, res, next) => {
         best_week: Number(best_week || 0),
         floor_income: Number(worst_week || 0),
         average_income: (Number(weekly_low || 0) + Number(weekly_high || 0)) / 2,
-        volatility_score: ((Number(weekly_high || 0) - Number(weekly_low || 0)) / ((Number(weekly_low || 0) + Number(weekly_high || 0)) / 2 || 1)) * 100
+        volatility_score: ((Number(weekly_high || 0) - Number(weekly_low || 0)) / ((Number(weekly_low || 0) + Number(weekly_high || 0)) / 2 || 1)) * 100,
+        available_cash: Number(available_cash || 0),
+        current_buffer: Number(available_cash || 0)
       }
     });
 

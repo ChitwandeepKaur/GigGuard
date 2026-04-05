@@ -4,6 +4,7 @@ import IncomeProfiler from '../components/onboarding/IncomeProfiler';
 import ExpenseSetup from '../components/onboarding/ExpenseSetup';
 import InsuranceStep from '../components/onboarding/InsuranceStep';
 import ProfileViewer from '../components/onboarding/ProfileViewer';
+import Button from '../components/ui/Button';
 import api from '../services/api';
 
 export default function Onboarding() {
@@ -42,7 +43,8 @@ export default function Onboarding() {
       subscriptions: '',
       eating_out: '',
       shopping: '',
-      entertainment: ''
+      entertainment: '',
+      available_cash: ''
     };
   });
 
@@ -74,7 +76,8 @@ export default function Onboarding() {
             subscriptions: res.data.expenses?.subscriptions || '',
             eating_out: res.data.expenses?.eating_out || '',
             shopping: res.data.expenses?.shopping || '',
-            entertainment: res.data.expenses?.entertainment || ''
+            entertainment: res.data.expenses?.entertainment || '',
+            available_cash: res.data.profile.available_cash || ''
           });
           setHasExistingProfile(true);
           setIsEditing(false);
@@ -166,16 +169,60 @@ export default function Onboarding() {
     );
   }
 
+  if (isEditing && hasExistingProfile) {
+    const isEditValid = () => {
+      return (
+        formData.gig_types.length > 0 &&
+        formData.weekly_low !== '' &&
+        formData.weekly_high !== '' &&
+        formData.worst_week !== '' &&
+        formData.best_week !== '' &&
+        formData.available_cash !== '' &&
+        formData.rent !== '' &&
+        formData.utilities !== '' &&
+        formData.groceries !== ''
+      );
+    };
+
+    return (
+      <div className="min-h-screen bg-app-bg py-6 sm:py-12 px-4 sm:px-6 lg:px-8">
+        <div className="w-full max-w-3xl mx-auto space-y-8 animate-in slide-in-from-bottom-4 duration-500 relative pb-32">
+          <div className="flex justify-between items-center bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-display font-bold text-brand">Edit Profile</h1>
+              <p className="text-sm sm:text-base text-gray-500 mt-1">Update your income and expense parameters.</p>
+            </div>
+            <button onClick={() => { setIsEditing(false); setStep(0); }} className="text-sm font-bold text-gray-500 hover:text-brand transition-colors">
+              Cancel
+            </button>
+          </div>
+
+          {error && (
+            <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded-r-md text-sm shadow-sm flex items-center">
+              <span className="mr-3 text-lg">⚠️</span>
+              {error}
+            </div>
+          )}
+
+          <div className="space-y-8">
+             <IncomeProfiler formData={formData} setFormData={setFormData} hideNavigation={true} />
+             <ExpenseSetup formData={formData} setFormData={setFormData} hideNavigation={true} />
+          </div>
+
+          <div className="fixed sm:sticky bottom-0 sm:bottom-4 left-0 right-0 sm:left-auto sm:right-auto bg-white/95 backdrop-blur-md p-4 sm:p-6 border-t sm:border border-gray-200 mt-8 sm:rounded-xl shadow-[0_-5px_20px_rgba(0,0,0,0.05)] sm:shadow-[0_10px_40px_rgba(0,0,0,0.1)] flex flex-col sm:flex-row justify-between items-center z-50">
+             <p className="text-xs sm:text-sm text-gray-500 mb-3 sm:mb-0">Make sure all required fields (*) are filled.</p>
+             <Button onClick={handleComplete} disabled={isSubmitting || !isEditValid()} className="w-full sm:w-auto min-w-[200px] shadow-lg">
+                {isSubmitting ? 'Saving...' : 'Save Changes'}
+             </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-app-bg py-12 px-4 sm:px-6 lg:px-8">
       <div className="w-full max-w-2xl mx-auto">
-        {hasExistingProfile && (
-           <div className="mb-6">
-             <button onClick={() => { setIsEditing(false); setStep(0); }} className="text-sm font-bold text-app-muted hover:text-brand transition-colors flex items-center gap-1">
-               ← Cancel Editing
-             </button>
-           </div>
-        )}
         <div className="flex justify-center items-center gap-3 mb-10">
           {[0, 1, 2].map((i) => (
             <div key={i} className="flex items-center">
