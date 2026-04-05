@@ -8,6 +8,7 @@ export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
@@ -15,6 +16,22 @@ export default function Auth() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+
+    if (!isLogin) {
+      if (password !== confirmPassword) {
+        return setError('Passwords do not match.');
+      }
+      if (password.length < 8) {
+        return setError('Password must be at least 8 characters long.');
+      }
+      if (!/[A-Z]/.test(password)) {
+        return setError('Password must contain at least one capital letter.');
+      }
+      if (!/[\d\W_]/.test(password)) {
+        return setError('Password must contain at least one digit or special character.');
+      }
+    }
+
     setIsLoading(true);
 
     try {
@@ -36,9 +53,12 @@ export default function Auth() {
         } catch (saveErr) {
           console.error("Failed to save pending profile:", saveErr);
         }
+        navigate('/dashboard');
+      } else if (!isLogin) {
+        navigate('/onboarding');
+      } else {
+        navigate('/dashboard');
       }
-      
-      navigate('/dashboard');
     } catch (err) {
       console.error(err);
       setError(err.response?.data?.error || 'Authentication failed. Please check your credentials.');
@@ -85,7 +105,34 @@ export default function Auth() {
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
             />
+            {!isLogin && (
+              <ul className="text-xs mt-3 space-y-1 font-medium">
+                <li className={`flex items-center transition-colors ${password.length >= 8 ? 'text-green-600' : 'text-app-muted'}`}>
+                  <span className="mr-2 text-sm">{password.length >= 8 ? '✓' : '•'}</span> At least 8 characters
+                </li>
+                <li className={`flex items-center transition-colors ${/[A-Z]/.test(password) ? 'text-green-600' : 'text-app-muted'}`}>
+                  <span className="mr-2 text-sm">{/[A-Z]/.test(password) ? '✓' : '•'}</span> 1 capital letter
+                </li>
+                <li className={`flex items-center transition-colors ${/[\d\W_]/.test(password) ? 'text-green-600' : 'text-app-muted'}`}>
+                  <span className="mr-2 text-sm">{/[\d\W_]/.test(password) ? '✓' : '•'}</span> 1 digit or special character
+                </li>
+              </ul>
+            )}
           </div>
+
+          {!isLogin && (
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">Confirm Password <span className="text-danger">*</span></label>
+              <input 
+                type="password" 
+                required
+                className="w-full p-3 border border-gray-200 bg-gray-50 rounded-lg focus:ring-2 focus:ring-brand focus:border-transparent outline-none transition-all"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="••••••••"
+              />
+            </div>
+          )}
 
           <Button type="submit" className="w-full py-4 mt-8 text-lg font-bold shadow-md hover:shadow-lg transition-shadow" disabled={isLoading}>
             {isLoading ? 'Processing...' : (isLogin ? 'Secure Login' : 'Create Account')}
