@@ -44,9 +44,10 @@ Your output must be strict JSON matching this schema:
   "renewalDate": "YYYY-MM-DD" // or "Not specified in document"
 }
 Important rules:
-1. Provide plain English, concise bullets for isCovered and notCovered.
-2. Focus on things critical for gig workers.
-3. If deductible, limits, or renewal date are not explicitly stated, output exactly "Not specified in document". Do NOT hallucinate data.`
+1. EXTREME BREVITY: Maximum 4 bullets per category (isCovered, notCovered, hiddenTerms).
+2. PUNCHY & LEGIBLE: Maximum 6 to 8 words per bullet point. Do not use full sentences. Cut all legal jargon. It must be highly scanable for a quick UI dashboard.
+3. Focus on things critical for gig workers.
+4. If deductible, limits, or renewal date are not explicitly stated, output exactly "Not specified in document". Do NOT hallucinate data.`
 
   const prompt = `${systemInstruction}\n\n--- POLICY DOCUMENT ---\n${policyText}`
 
