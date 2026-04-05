@@ -12,6 +12,12 @@ function isThisWeek(date) {
   return entryDate >= startOfWeek;
 }
 
+const BILL_CATEGORIES = [
+  'rent', 'utilities', 'debt_minimums', 'transport', 'groceries', 
+  'insurance_cost', 'phone', 'subscriptions', 'eating_out', 
+  'shopping', 'entertainment'
+];
+
 router.get('/income', async (req, res, next) => {
   try {
     const entries = await prisma.incomeEntry.findMany({
@@ -120,9 +126,27 @@ router.delete('/income/:id', async (req, res, next) => {
 
 router.get('/summary', async (req, res, next) => {
   try {
-    const [profile, expenses, recentIncome] = await Promise.all([
-      prisma.userProfile.findUnique({ where: { userId: req.userId } }),
-      prisma.expenseProfile.findUnique({ where: { userId: req.userId } }),
+    let profile = await prisma.userProfile.findUnique({ where: { userId: req.userId } });
+    let expenses = await prisma.expenseProfile.findUnique({ where: { userId: req.userId } });
+
+    if (!profile || !expenses) {
+      return res.status(404).json({ error: 'Profile or expenses not found' });
+    }
+
+    // Monthly Reset Logic for Bill Payments
+    const now = new Date();
+    const lastReset = new Date(expenses.last_paid_reset);
+    if (now.getMonth() !== lastReset.getMonth() || now.getFullYear() !== lastReset.getFullYear()) {
+      expenses = await prisma.expenseProfile.update({
+        where: { userId: req.userId },
+        data: {
+          paid_categories: [],
+          last_paid_reset: now
+        }
+      });
+    }
+
+    const [recentIncome] = await Promise.all([
       prisma.incomeEntry.findMany({
         where: {
           userId: req.userId,
@@ -132,19 +156,26 @@ router.get('/summary', async (req, res, next) => {
       })
     ]);
 
-    if (!profile || !expenses) {
-      return res.status(404).json({ error: 'Profile or expenses not found' });
-    }
-
     const thisWeekIncome = recentIncome
       .filter(e => isThisWeek(e.week_of))
       .reduce((sum, e) => sum + e.amount, 0);
 
     const taxReserve = calcSEtaxReserve(thisWeekIncome);
     
-    const billsDueThisWeek = expenses.survival_number; // Approximation
-    const emergencyBufferTarget = expenses.survival_number * 3;
-    const avgFlexible = 150; // Default demo value
+    // Calculate actual bills due (sum of categories not in paid_categories)
+    const paidSet = new Set(expenses.paid_categories);
+    const nonNegotiableKeys = ['rent', 'utilities', 'debt_minimums', 'transport', 'groceries', 'insurance_cost'];
+    
+    let currentMonthlyBillsDue = 0;
+    nonNegotiableKeys.forEach(key => {
+      if (!paidSet.has(key)) {
+        currentMonthlyBillsDue += expenses[key] || 0;
+      }
+    });
+
+    const billsDueThisWeek = currentMonthlyBillsDue / 4.33;
+    const emergencyBufferTarget = expenses.survival_number * 3 * 4.33; // Target is usually 3-6 months of survival
+    const avgFlexible = 150; 
 
     const safeToSpend = calcSafeToSpend({
       availableCash: profile.available_cash,
@@ -173,7 +204,7 @@ router.get('/summary', async (req, res, next) => {
       billsDueThisWeek,
       taxReserve,
       totalTaxOwed,
-      estimatedPenalty: calcTaxPenalty(totalTaxOwed, 0), // 0 days overdue for demo
+      estimatedPenalty: calcTaxPenalty(totalTaxOwed, 0),
       nextTaxDeadline: nextDeadline,
       windfall,
       goodWeekThreshold: profile.best_week,
@@ -181,8 +212,60 @@ router.get('/summary', async (req, res, next) => {
       volatilityScore: profile.volatility_score,
       thisWeekIncome,
       isSurvivalMode: thisWeekIncome < profile.floor_income,
-      recentIncome
+      recentIncome,
+      expenses // Include full expense profile for billing UI
     });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post('/toggle-bill', async (req, res, next) => {
+  try {
+    const { category } = req.body;
+    if (!BILL_CATEGORIES.includes(category)) {
+      return res.status(400).json({ error: 'Invalid bill category' });
+    }
+
+    const expenses = await prisma.expenseProfile.findUnique({
+      where: { userId: req.userId }
+    });
+
+    if (!expenses) return res.status(404).json({ error: 'Expense profile not found' });
+
+    const isPaid = expenses.paid_categories.includes(category);
+    const amount = expenses[category];
+
+    let updatedPaid = [...expenses.paid_categories];
+    if (isPaid) {
+      updatedPaid = updatedPaid.filter(c => c !== category);
+    } else {
+      updatedPaid.push(category);
+    }
+
+    const [updatedExpenses] = await prisma.$transaction([
+      prisma.expenseProfile.update({
+        where: { userId: req.userId },
+        data: { paid_categories: updatedPaid }
+      }),
+      // Automatically log transaction if marking as paid
+      ...(isPaid ? [] : [
+        prisma.expenseEntry.create({
+          data: {
+            userId: req.userId,
+            amount: amount,
+            category: category,
+            note: `Monthly ${category} payment (Automatic)`,
+          }
+        }),
+        prisma.userProfile.update({
+          where: { userId: req.userId },
+          data: { available_cash: { decrement: amount } }
+        })
+      ])
+    ]);
+
+    res.json({ success: true, paid_categories: updatedExpenses.paid_categories });
   } catch (error) {
     next(error);
   }

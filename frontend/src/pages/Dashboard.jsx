@@ -6,6 +6,7 @@ import TaxTracker from '../components/dashboard/TaxTracker';
 import WindfallStabilizer from '../components/dashboard/WindfallStabilizer';
 import TransactionModal from '../components/dashboard/TransactionModal';
 import TriageModal from '../components/dashboard/TriageModal';
+import MonthlyBills from '../components/dashboard/MonthlyBills';
 
 export default function Dashboard() {
   const [summary, setSummary] = useState(null);
@@ -218,6 +219,11 @@ export default function Dashboard() {
             owed={summary?.totalTaxOwed}
             deadline={summary?.nextTaxDeadline}
             penalty={summary?.estimatedPenalty}
+          />
+          
+          <MonthlyBills 
+            expenses={summary?.expenses} 
+            onUpdate={fetchData} 
           />
         </div>
       </div>

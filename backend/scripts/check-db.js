@@ -5,17 +5,17 @@ async function main() {
   try {
     const incomeCount = await prisma.incomeEntry.count();
     const expenseCount = await prisma.expenseEntry.count();
-    const user = await prisma.user.findFirst({ where: { email: 'marcus@demo.com' } });
+    const user = await prisma.user.findFirst({ where: { email: 'test@gmail.com' } });
     
     console.log('Seeding Verification:');
     console.log('-------------------');
     console.log('Income entries:', incomeCount);
     console.log('Expense entries:', expenseCount);
-    console.log('Marcus demo user exists:', !!user);
+    console.log('test@gmail.com demo user exists:', !!user);
     
     if (expenseCount > 0) {
       const sample = await prisma.expenseEntry.findFirst({
-        where: { user: { email: 'marcus@demo.com' } },
+        where: { user: { email: 'test@gmail.com' } },
         orderBy: { date: 'desc' }
       });
       console.log('Sample Expense:', sample);

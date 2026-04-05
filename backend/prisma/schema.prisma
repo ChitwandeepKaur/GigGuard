@@ -56,6 +56,8 @@ model ExpenseProfile {
   shopping        Float    @default(0)
   entertainment   Float    @default(0)
   survival_number Float    @default(0)
+  paid_categories String[] @default([])
+  last_paid_reset DateTime @default(now())
   updated_at      DateTime @updatedAt
   user            User     @relation(fields: [userId], references: [id])
 }

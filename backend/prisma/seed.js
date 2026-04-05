@@ -8,15 +8,18 @@ const prisma = new PrismaClient()
 async function main() {
   console.log('Seeding GigShield demo data...')
 
-  // Clean existing demo data
-  await prisma.insuranceRecommendation.deleteMany({ where: { user: { email: 'marcus@demo.com' } } })
-  await prisma.insurancePolicy.deleteMany({ where: { user: { email: 'marcus@demo.com' } } })
-  await prisma.expenseEntry.deleteMany({ where: { user: { email: 'marcus@demo.com' } } })
-  await prisma.incomeEntry.deleteMany({ where: { user: { email: 'marcus@demo.com' } } })
-  await prisma.expenseEntry.deleteMany({ where: { user: { email: 'marcus@demo.com' } } })
-  await prisma.expenseProfile.deleteMany({ where: { user: { email: 'marcus@demo.com' } } })
-  await prisma.userProfile.deleteMany({ where: { user: { email: 'marcus@demo.com' } } })
-  await prisma.user.deleteMany({ where: { email: 'marcus@demo.com' } })
+  // ─── USER & CLEANUP ─────────────────────────────────────────────
+  // Clean existing demo data for both marcus (old) and test (new)
+  const cleanupEmails = ['marcus@demo.com', 'test@gmail.com'];
+  for (const email of cleanupEmails) {
+    await prisma.insuranceRecommendation.deleteMany({ where: { user: { email } } })
+    await prisma.insurancePolicy.deleteMany({ where: { user: { email } } })
+    await prisma.expenseEntry.deleteMany({ where: { user: { email } } })
+    await prisma.incomeEntry.deleteMany({ where: { user: { email } } })
+    await prisma.expenseProfile.deleteMany({ where: { user: { email } } })
+    await prisma.userProfile.deleteMany({ where: { user: { email } } })
+    await prisma.user.deleteMany({ where: { email } })
+  }
 
   // ─── SUPABASE AUTH ──────────────────────────────────────────────
   const supabase = createClient(
@@ -25,17 +28,20 @@ async function main() {
   );
 
   let userId;
+  const demoEmail = 'test@gmail.com';
+  const demoPassword = 'demo1234';
+
   const { data: signInData } = await supabase.auth.signInWithPassword({
-    email: 'marcus@demo.com',
-    password: 'demo1234'
+    email: demoEmail,
+    password: demoPassword
   });
 
   if (signInData?.user) {
     userId = signInData.user.id;
   } else {
     const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-      email: 'marcus@demo.com',
-      password: 'demo1234'
+      email: demoEmail,
+      password: demoPassword
     });
     if (signUpError) {
       console.error('Supabase Auth error:', signUpError);
@@ -45,12 +51,12 @@ async function main() {
   }
 
   // ─── USER ───────────────────────────────────────────────────────
-  const passwordHash = await bcrypt.hash('demo1234', 10)
+  const passwordHash = await bcrypt.hash(demoPassword, 10)
 
   const user = await prisma.user.create({
     data: {
       id: userId,
-      email: 'marcus@demo.com',
+      email: demoEmail,
       password_hash: passwordHash,
     }
   })
@@ -131,14 +137,6 @@ async function main() {
   }
 
   const incomeHistory = [
-    { weeksAgo: 12, amount: 920,  source: 'doordash',  note: 'Normal week' },
-    { weeksAgo: 11, amount: 1540, source: 'uber',      note: 'Busy weekend' },
-    { weeksAgo: 10, amount: 680,  source: 'doordash',  note: 'Sick mid-week' },
-    { weeksAgo: 9,  amount: 1820, source: 'both',      note: 'Double-shifted' },
-    { weeksAgo: 8,  amount: 1150, source: 'doordash',  note: null },
-    { weeksAgo: 7,  amount: 620,  source: 'uber',      note: 'Car maintenance day' },
-    { weeksAgo: 6,  amount: 1980, source: 'both',      note: 'Event surge pricing' },
-    { weeksAgo: 5,  amount: 1100, source: 'doordash',  note: null },
     { weeksAgo: 4,  amount: 890,  source: 'uber',      note: null },
     { weeksAgo: 3,  amount: 2050, source: 'both',      note: 'Concert weekend' },
     { weeksAgo: 2,  amount: 1350, source: 'doordash',  note: null },
@@ -216,7 +214,7 @@ async function main() {
 
   // ─── SUMMARY ────────────────────────────────────────────────────
   console.log('\n--- Seed complete ---')
-  console.log('Login:    marcus@demo.com / demo1234')
+  console.log('Login:    test@gmail.com / demo1234')
   console.log('Profile:  DoorDash + Uber, weekly $800–$1,800')
   console.log('Survival: $' + survivalNumber.toFixed(0) + '/week')
   console.log('Buffer:   ~1.7 bad weeks covered')
