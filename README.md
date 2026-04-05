@@ -4,6 +4,10 @@
 
 Built over a caffeine-fueled weekend for the **State Farm Financial Wellness Hackathon**. 
 
+> 🚀 **Try the Demo Live!**
+> **Email:** `marcus@demo.com`
+> **Password:** `demo1234`
+
 ## The Problem
 If you drive for Uber, deliver for DoorDash, or freelance online, your income is a chaotic rollercoaster. One week you make $1,200. The next, your car breaks down and you make $200. 
 
@@ -77,7 +81,7 @@ cd backend && npm run dev
 cd frontend && npm run dev
 ```
 
-Hit `http://localhost:5173` and click **"Load Demo"** to jump straight into Marcus's dashboard.
+Hit `http://localhost:5173` and log in with the demo credentials above (`marcus@demo.com` / `demo1234`) to jump straight into the dashboard.
 
 ---
 *Built with ❤️ for gig workers everywhere.*
