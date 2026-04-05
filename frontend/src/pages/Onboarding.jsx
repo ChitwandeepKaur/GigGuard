@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import IncomeProfiler from '../components/onboarding/IncomeProfiler';
 import ExpenseSetup from '../components/onboarding/ExpenseSetup';
 import InsuranceStep from '../components/onboarding/InsuranceStep';
+import ProfileViewer from '../components/onboarding/ProfileViewer';
 import api from '../services/api';
 
 export default function Onboarding() {
@@ -10,6 +11,10 @@ export default function Onboarding() {
   const [step, setStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
+  
+  const [isEditing, setIsEditing] = useState(false);
+  const [hasExistingProfile, setHasExistingProfile] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const [formData, setFormData] = useState(() => {
     const savedDraft = localStorage.getItem('onboardingDraft');
@@ -42,8 +47,54 @@ export default function Onboarding() {
   });
 
   useEffect(() => {
-    localStorage.setItem('onboardingDraft', JSON.stringify(formData));
-  }, [formData]);
+    const fetchProfile = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setLoading(false);
+        setIsEditing(true);
+        return;
+      }
+      try {
+        const res = await api.get('/api/user/dashboard');
+        if (res.data?.profile) {
+          setFormData({
+            gig_types: res.data.profile.gig_types || [],
+            income_frequency: res.data.profile.income_frequency || 'weekly',
+            weekly_low: res.data.profile.weekly_low || '',
+            weekly_high: res.data.profile.weekly_high || '',
+            worst_week: res.data.profile.worst_week || '',
+            best_week: res.data.profile.best_week || '',
+            rent: res.data.expenses?.rent || '',
+            utilities: res.data.expenses?.utilities || '',
+            debt_minimums: res.data.expenses?.debt_minimums || '',
+            transport: res.data.expenses?.transport || '',
+            groceries: res.data.expenses?.groceries || '',
+            insurance_cost: res.data.expenses?.insurance_cost || '',
+            phone: res.data.expenses?.phone || '',
+            subscriptions: res.data.expenses?.subscriptions || '',
+            eating_out: res.data.expenses?.eating_out || '',
+            shopping: res.data.expenses?.shopping || '',
+            entertainment: res.data.expenses?.entertainment || ''
+          });
+          setHasExistingProfile(true);
+          setIsEditing(false);
+        } else {
+          setIsEditing(true);
+        }
+      } catch(e) {
+        setIsEditing(true);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProfile();
+  }, []);
+
+  useEffect(() => {
+    if (isEditing) {
+      localStorage.setItem('onboardingDraft', JSON.stringify(formData));
+    }
+  }, [formData, isEditing]);
 
   const nextStep = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -68,7 +119,14 @@ export default function Onboarding() {
     try {
       await api.post('/api/user/profile', formData);
       localStorage.removeItem('onboardingDraft');
-      navigate('/dashboard');
+      if (hasExistingProfile) {
+        setIsEditing(false);
+        setStep(0);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        navigate('/dashboard');
+        window.location.reload(); // Force Navbar text refresh
+      }
     } catch (err) {
       console.error(err);
       setError('Failed to save profile. Make sure you are logged in and the server is running properly.');
@@ -90,9 +148,34 @@ export default function Onboarding() {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-app-bg flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-brand"></div>
+      </div>
+    );
+  }
+
+  if (!isEditing && hasExistingProfile) {
+    return (
+      <div className="min-h-screen bg-app-bg py-12 px-4 sm:px-6 lg:px-8">
+        <div className="w-full max-w-4xl mx-auto relative">
+          <ProfileViewer profileData={formData} onEdit={() => setIsEditing(true)} />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-app-bg py-12 px-4 sm:px-6 lg:px-8">
       <div className="w-full max-w-2xl mx-auto">
+        {hasExistingProfile && (
+           <div className="mb-6">
+             <button onClick={() => { setIsEditing(false); setStep(0); }} className="text-sm font-bold text-app-muted hover:text-brand transition-colors flex items-center gap-1">
+               ← Cancel Editing
+             </button>
+           </div>
+        )}
         <div className="flex justify-center items-center gap-3 mb-10">
           {[0, 1, 2].map((i) => (
             <div key={i} className="flex items-center">

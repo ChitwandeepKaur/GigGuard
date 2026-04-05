@@ -11,12 +11,15 @@ export default function Button({
   const variants = {
     primary: "bg-brand text-white hover:bg-brand-light px-6 py-3",
     secondary: "bg-transparent border-[1.5px] border-brand text-brand hover:bg-brand-surface px-[23px] py-[11px]",
-    danger: "bg-danger text-white hover:opacity-90 px-6 py-3"
+    danger: "bg-danger text-white hover:opacity-90 px-6 py-3",
+    outline: "bg-transparent border-[1.5px] border-gray-300 text-gray-500 hover:bg-gray-50 px-6 py-3"
   };
+
+  const disabledStyles = props.disabled ? 'opacity-60 cursor-not-allowed pointer-events-none saturate-50' : '';
 
   return (
     <button 
-      className={`${baseStyles} ${variants[variant] || variants.primary} ${className}`}
+      className={`${baseStyles} ${variants[variant] || variants.primary} ${disabledStyles} ${className}`}
       {...props}
     >
       {children}

@@ -37,7 +37,11 @@ export default function InsuranceStep({ formData, isSubmitting, onComplete, onBa
     let mounted = true;
     try {
       const response = await api.post('/api/ai/recommendation/preview', formData);
-      if (mounted) setRecommendationData(response.data);
+      if (mounted) {
+        setRecommendationData(response.data);
+        localStorage.setItem('insuranceRecommendations', JSON.stringify(response.data));
+        localStorage.setItem('recommendationsProfileData', JSON.stringify(formData));
+      }
     } catch (err) {
       console.error('Failed to fetch recommendations:', err);
       if (mounted) setError('Failed to securely generate AI recommendations. You can still complete your setup below.');

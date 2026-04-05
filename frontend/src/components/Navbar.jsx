@@ -21,7 +21,7 @@ const Navbar = () => {
         setIsAuthenticating(true);
         try {
           const res = await api.get('/api/auth/me');
-          setUser(res.data.user);
+          setUser({ ...res.data.user, dbProfile: res.data.dbProfile });
         } catch (err) {
           // Token is likely invalid or expired
           localStorage.removeItem('token');
@@ -40,8 +40,10 @@ const Navbar = () => {
     setIsMenuOpen(false); // Close menu on navigation
   }, [location.pathname]); // Re-runs when the user navigates (e.g. after login)
 
+  const hasCompletedOnboarding = user?.dbProfile?.profile ? true : false;
+
   const handleLogoutRequest = () => {
-    if (location.pathname === '/onboarding') {
+    if (!hasCompletedOnboarding && location.pathname === '/onboarding') {
       setPendingAction({ type: 'LOGOUT' });
       setShowOnboardingAlert(true);
     } else {
@@ -62,7 +64,7 @@ const Navbar = () => {
   };
 
   const handleNavClick = (e, path) => {
-    if (location.pathname === '/onboarding' && path !== '/onboarding') {
+    if (!hasCompletedOnboarding && location.pathname === '/onboarding' && path !== '/onboarding') {
       e.preventDefault();
       setPendingAction({ type: 'NAVIGATE', path });
       setShowOnboardingAlert(true);
@@ -73,7 +75,7 @@ const Navbar = () => {
 
   const links = [
     { name: 'Home', path: '/' },
-    { name: 'Onboarding', path: '/onboarding' },
+    { name: hasCompletedOnboarding ? 'Profile Details' : 'Onboarding', path: '/onboarding' },
     ...(isLoggedIn ? [{ name: 'Dashboard', path: '/dashboard' }] : []),
     { name: 'Insurance Hub', path: '/insurance' },
   ];
