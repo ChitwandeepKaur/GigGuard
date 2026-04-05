@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import api from '../../services/api';
+import { Loader2, Check, Settings } from 'lucide-react';
 
 const CATEGORY_LABELS = {
   rent: 'Rent / Mortgage',
@@ -15,18 +16,23 @@ const CATEGORY_LABELS = {
   entertainment: 'Entertainment'
 };
 
-export default function MonthlyBills({ expenses, onUpdate }) {
+export default function MonthlyBills({ expenses, onUpdate, onManage }) {
+  const [loadingCategory, setLoadingCategory] = useState(null);
+
   if (!expenses) return null;
 
   const paidCategories = expenses.paid_categories || [];
   
   const handleToggle = async (category) => {
     try {
+      setLoadingCategory(category);
       await api.post('/api/finance/toggle-bill', { category });
       onUpdate();
     } catch (err) {
       console.error('Error toggling bill:', err);
       alert('Failed to update bill status.');
+    } finally {
+      setLoadingCategory(null);
     }
   };
 
@@ -44,13 +50,22 @@ export default function MonthlyBills({ expenses, onUpdate }) {
           <h3 className="text-[10px] font-mono text-app-muted uppercase tracking-widest font-bold">Monthly Bill Tracker</h3>
           <p className="text-[10px] text-app-muted mt-1 uppercase tracking-tighter">Resets on the 1st of each month</p>
         </div>
-        <div className="flex gap-2">
-          <span className="px-2 py-0.5 bg-emerald-500/10 text-emerald-500 text-[8px] font-bold rounded-full uppercase tracking-widest border border-emerald-500/20">
-            {paidCategories.length} Paid
-          </span>
-          <span className="px-2 py-0.5 bg-app-muted/10 text-app-muted text-[8px] font-bold rounded-full uppercase tracking-widest border border-app-border">
-            {billItems.length - paidCategories.length} Due
-          </span>
+        <div className="flex items-center gap-3">
+          <div className="flex gap-2">
+            <span className="px-2 py-0.5 bg-emerald-500/10 text-emerald-500 text-[8px] font-bold rounded-full uppercase tracking-widest border border-emerald-500/20">
+              {paidCategories.length} Paid
+            </span>
+            <span className="px-2 py-0.5 bg-app-muted/10 text-app-muted text-[8px] font-bold rounded-full uppercase tracking-widest border border-app-border">
+              {billItems.length - paidCategories.length} Due
+            </span>
+          </div>
+          <button 
+            onClick={onManage}
+            className="p-1.5 hover:bg-app-muted/10 rounded-md transition-all text-app-muted hover:text-app-text border border-transparent hover:border-app-border group"
+            title="Manage Monthly Budgets"
+          >
+            <Settings size={14} className="group-hover:rotate-45 transition-transform" />
+          </button>
         </div>
       </div>
       
@@ -64,17 +79,18 @@ export default function MonthlyBills({ expenses, onUpdate }) {
               <div className="flex items-center gap-4">
                 <button
                   onClick={() => handleToggle(item.key)}
+                  disabled={loadingCategory !== null}
                   className={`w-5 h-5 rounded-sm border flex items-center justify-center transition-all ${
                     item.isPaid 
                       ? 'bg-emerald-500 border-emerald-500 text-white' 
                       : 'border-app-border bg-transparent group-hover:border-brand'
-                  }`}
+                  } ${loadingCategory !== null ? 'cursor-not-allowed opacity-50' : ''}`}
                 >
-                  {item.isPaid && (
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
-                  )}
+                  {loadingCategory === item.key ? (
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                  ) : item.isPaid ? (
+                    <Check className="h-3.5 w-3.5" />
+                  ) : null}
                 </button>
                 <div>
                   <p className={`text-sm font-bold ${item.isPaid ? 'text-app-muted line-through' : 'text-app-text'}`}>

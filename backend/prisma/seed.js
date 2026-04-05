@@ -28,26 +28,37 @@ async function main() {
   );
 
   let userId;
-  const demoEmail = 'test@gmail.com';
+  const demoEmail = 'marcus_demo@gigguard.app';
   const demoPassword = 'demo1234';
 
-  const { data: signInData } = await supabase.auth.signInWithPassword({
+  const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
     email: demoEmail,
     password: demoPassword
   });
 
   if (signInData?.user) {
     userId = signInData.user.id;
-  } else {
+    console.log('Signed in to existing Supabase user:', userId);
+  } else if (signInError?.message === 'Invalid login credentials') {
+    // If sign in failed due to credentials, try signing up (or it might already exist with different credentials)
     const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
       email: demoEmail,
       password: demoPassword
     });
+    
     if (signUpError) {
-      console.error('Supabase Auth error:', signUpError);
+      if (signUpError.message === 'User already registered') {
+        console.error('ERROR: User already exists in Supabase with different credentials. Please delete them in the Supabase dashboard.');
+        throw signUpError;
+      }
+      console.error('Supabase SignUp error:', signUpError);
       throw signUpError;
     }
     userId = signUpData?.user?.id;
+    console.log('Created new Supabase user:', userId);
+  } else {
+    console.error('Supabase SignIn error:', signInError);
+    throw signInError;
   }
 
   // ─── USER ───────────────────────────────────────────────────────
@@ -214,7 +225,7 @@ async function main() {
 
   // ─── SUMMARY ────────────────────────────────────────────────────
   console.log('\n--- Seed complete ---')
-  console.log('Login:    test@gmail.com / demo1234')
+  console.log('Login:    marcus_demo@gigguard.app / demo1234')
   console.log('Profile:  DoorDash + Uber, weekly $800–$1,800')
   console.log('Survival: $' + survivalNumber.toFixed(0) + '/week')
   console.log('Buffer:   ~1.7 bad weeks covered')

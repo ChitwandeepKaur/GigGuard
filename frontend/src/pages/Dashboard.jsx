@@ -7,6 +7,7 @@ import WindfallStabilizer from '../components/dashboard/WindfallStabilizer';
 import TransactionModal from '../components/dashboard/TransactionModal';
 import TriageModal from '../components/dashboard/TriageModal';
 import MonthlyBills from '../components/dashboard/MonthlyBills';
+import ManageBillsModal from '../components/dashboard/ManageBillsModal';
 
 export default function Dashboard() {
   const [summary, setSummary] = useState(null);
@@ -17,6 +18,7 @@ export default function Dashboard() {
   const [showLogModal, setShowLogModal] = useState(false);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [showTriageModal, setShowTriageModal] = useState(false);
+  const [showManageBillsModal, setShowManageBillsModal] = useState(false);
   const [balances, setBalances] = useState({ available_cash: 0, current_buffer: 0 });
 
   const fetchData = async () => {
@@ -224,6 +226,7 @@ export default function Dashboard() {
           <MonthlyBills 
             expenses={summary?.expenses} 
             onUpdate={fetchData} 
+            onManage={() => setShowManageBillsModal(true)}
           />
         </div>
       </div>
@@ -321,6 +324,13 @@ export default function Dashboard() {
         isOpen={showTriageModal} 
         onClose={() => setShowTriageModal(false)}
         summary={summary}
+      />
+
+      <ManageBillsModal 
+        isOpen={showManageBillsModal} 
+        onClose={() => setShowManageBillsModal(false)}
+        expenses={summary?.expenses}
+        onUpdate={fetchData}
       />
     </div>
   );

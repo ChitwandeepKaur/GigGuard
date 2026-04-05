@@ -49,7 +49,11 @@ router.post('/profile', async (req, res, next) => {
       }
     });
 
-    const nonNegotiableSum = Number(rent || 0) + Number(utilities || 0) + Number(debt_minimums || 0) + Number(transport || 0) + Number(groceries || 0) + Number(insurance_cost || 0);
+    const totalBillsSum = 
+      Number(rent || 0) + Number(utilities || 0) + Number(debt_minimums || 0) + 
+      Number(transport || 0) + Number(groceries || 0) + Number(insurance_cost || 0) +
+      Number(phone || 0) + Number(subscriptions || 0) + Number(eating_out || 0) +
+      Number(shopping || 0) + Number(entertainment || 0);
 
     const expenses = await prisma.expenseProfile.upsert({
       where: { userId: req.userId },
@@ -65,7 +69,7 @@ router.post('/profile', async (req, res, next) => {
         eating_out: Number(eating_out || 0),
         shopping: Number(shopping || 0),
         entertainment: Number(entertainment || 0),
-        survival_number: nonNegotiableSum / 4.33
+        survival_number: totalBillsSum / 4.33
       },
       create: {
         userId: req.userId,
@@ -80,11 +84,42 @@ router.post('/profile', async (req, res, next) => {
         eating_out: Number(eating_out || 0),
         shopping: Number(shopping || 0),
         entertainment: Number(entertainment || 0),
-        survival_number: nonNegotiableSum / 4.33
+        survival_number: totalBillsSum / 4.33
       }
     });
 
     res.json({ profile, expenses });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.patch('/expenses', async (req, res, next) => {
+  try {
+    const data = req.body;
+    
+    // Calculate new survival number from the full set (old + new)
+    const current = await prisma.expenseProfile.findUnique({ where: { userId: req.userId } });
+    if (!current) return res.status(404).json({ error: 'Expense profile not found' });
+
+    const updatedData = { ...current, ...data };
+    const billKeys = [
+      'rent', 'utilities', 'debt_minimums', 'transport', 'groceries', 
+      'insurance_cost', 'phone', 'subscriptions', 'eating_out', 
+      'shopping', 'entertainment'
+    ];
+
+    const totalBillsSum = billKeys.reduce((sum, key) => sum + Number(updatedData[key] || 0), 0);
+
+    const updated = await prisma.expenseProfile.update({
+      where: { userId: req.userId },
+      data: {
+        ...data,
+        survival_number: totalBillsSum / 4.33
+      }
+    });
+
+    res.json(updated);
   } catch (error) {
     next(error);
   }

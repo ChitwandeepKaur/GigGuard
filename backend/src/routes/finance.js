@@ -164,10 +164,9 @@ router.get('/summary', async (req, res, next) => {
     
     // Calculate actual bills due (sum of categories not in paid_categories)
     const paidSet = new Set(expenses.paid_categories);
-    const nonNegotiableKeys = ['rent', 'utilities', 'debt_minimums', 'transport', 'groceries', 'insurance_cost'];
     
     let currentMonthlyBillsDue = 0;
-    nonNegotiableKeys.forEach(key => {
+    BILL_CATEGORIES.forEach(key => {
       if (!paidSet.has(key)) {
         currentMonthlyBillsDue += expenses[key] || 0;
       }
