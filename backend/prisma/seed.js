@@ -1,5 +1,7 @@
 import { PrismaClient } from '@prisma/client'
 import bcrypt from 'bcryptjs'
+import 'dotenv/config'
+import { createClient } from '@supabase/supabase-js'
 
 const prisma = new PrismaClient()
 
@@ -11,15 +13,43 @@ async function main() {
   await prisma.insurancePolicy.deleteMany({ where: { user: { email: 'marcus@demo.com' } } })
   await prisma.expenseEntry.deleteMany({ where: { user: { email: 'marcus@demo.com' } } })
   await prisma.incomeEntry.deleteMany({ where: { user: { email: 'marcus@demo.com' } } })
+  await prisma.expenseEntry.deleteMany({ where: { user: { email: 'marcus@demo.com' } } })
   await prisma.expenseProfile.deleteMany({ where: { user: { email: 'marcus@demo.com' } } })
   await prisma.userProfile.deleteMany({ where: { user: { email: 'marcus@demo.com' } } })
   await prisma.user.deleteMany({ where: { email: 'marcus@demo.com' } })
+
+  // ─── SUPABASE AUTH ──────────────────────────────────────────────
+  const supabase = createClient(
+    process.env.SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_KEY
+  );
+
+  let userId;
+  const { data: signInData } = await supabase.auth.signInWithPassword({
+    email: 'marcus@demo.com',
+    password: 'demo1234'
+  });
+
+  if (signInData?.user) {
+    userId = signInData.user.id;
+  } else {
+    const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+      email: 'marcus@demo.com',
+      password: 'demo1234'
+    });
+    if (signUpError) {
+      console.error('Supabase Auth error:', signUpError);
+      throw signUpError;
+    }
+    userId = signUpData?.user?.id;
+  }
 
   // ─── USER ───────────────────────────────────────────────────────
   const passwordHash = await bcrypt.hash('demo1234', 10)
 
   const user = await prisma.user.create({
     data: {
+      id: userId,
       email: 'marcus@demo.com',
       password_hash: passwordHash,
     }
