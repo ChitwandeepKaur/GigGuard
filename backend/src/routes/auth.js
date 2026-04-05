@@ -30,7 +30,7 @@ router.post('/register', async (req, res, next) => {
       });
     }
 
-    res.json({ token: data.session?.access_token || null, user: data.user });
+    res.json({ token: data.session?.access_token || null, refreshToken: data.session?.refresh_token || null, user: data.user });
   } catch (error) {
     next(error);
   }
@@ -44,7 +44,7 @@ router.post('/login', async (req, res, next) => {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) return res.status(401).json({ error: error.message });
 
-    res.json({ token: data.session.access_token, user: data.user });
+    res.json({ token: data.session.access_token, refreshToken: data.session.refresh_token, user: data.user });
   } catch (error) {
     next(error);
   }
@@ -54,6 +54,27 @@ router.post('/logout', async (req, res, next) => {
   try {
     // Just a placeholder response for the client to delete JWT correctly 
     res.json({ message: 'Logged out successfully' });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post('/refresh', async (req, res, next) => {
+  try {
+    const { refresh_token } = req.body;
+    if (!refresh_token) return res.status(400).json({ error: 'Refresh token required' });
+
+    const { data, error } = await supabase.auth.refreshSession({ refresh_token });
+    
+    if (error) {
+      return res.status(401).json({ error: error.message });
+    }
+
+    res.json({ 
+      token: data.session.access_token, 
+      refreshToken: data.session.refresh_token,
+      user: data.user 
+    });
   } catch (error) {
     next(error);
   }

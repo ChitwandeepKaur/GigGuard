@@ -38,9 +38,12 @@ export default function Auth() {
       const endpoint = isLogin ? '/api/auth/login' : '/api/auth/register';
       const response = await api.post(endpoint, { email, password });
       
-      const { token } = response.data;
+      const { token, refreshToken } = response.data;
       if (token) {
         localStorage.setItem('token', token);
+      }
+      if (refreshToken) {
+        localStorage.setItem('refreshToken', refreshToken);
       }
 
       // Automatically save pending onboarding profiles

@@ -7,21 +7,27 @@ const Navbar = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isAuthenticating, setIsAuthenticating] = useState(!!localStorage.getItem('token'));
 
   useEffect(() => {
     const fetchUser = async () => {
       const token = localStorage.getItem('token');
       if (token) {
+        setIsAuthenticating(true);
         try {
           const res = await api.get('/api/auth/me');
           setUser(res.data.user);
         } catch (err) {
           // Token is likely invalid or expired
           localStorage.removeItem('token');
+          localStorage.removeItem('refreshToken');
           setUser(null);
+        } finally {
+          setIsAuthenticating(false);
         }
       } else {
         setUser(null);
+        setIsAuthenticating(false);
       }
     };
     
@@ -35,6 +41,7 @@ const Navbar = () => {
       console.error('Logout error', e);
     }
     localStorage.removeItem('token');
+    localStorage.removeItem('refreshToken');
     setUser(null);
     navigate('/');
   };
@@ -79,7 +86,9 @@ const Navbar = () => {
           
           {/* Top Right Auth Section */}
           <div className="flex items-center">
-            {user ? (
+            {isAuthenticating ? (
+              <div className="ml-4 h-9 w-28 bg-gray-200/50 animate-pulse rounded-md" />
+            ) : user ? (
               <div 
                 className="relative ml-3"
                 onMouseEnter={() => setIsDropdownOpen(true)}
