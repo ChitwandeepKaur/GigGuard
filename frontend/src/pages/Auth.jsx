@@ -90,6 +90,23 @@ export default function Auth() {
           </div>
         )}
 
+        {isLogin && (
+          <div className="mb-6 p-4 bg-brand/5 border border-brand/20 rounded-lg text-sm text-center">
+            <p className="font-bold text-brand uppercase tracking-widest text-[10px] mb-2">Hackathon Demo Credentials</p>
+            <div className="flex flex-col gap-1 text-app-muted font-mono">
+              <p>Email: <span className="font-bold text-app-text">marcus@demo.com</span></p>
+              <p>Pass: <span className="font-bold text-app-text">demo1234</span></p>
+            </div>
+            <button 
+              type="button"
+              onClick={() => { setEmail('marcus@demo.com'); setPassword('demo1234'); }}
+              className="mt-3 text-xs bg-brand/10 hover:bg-brand/20 text-brand px-3 py-1 rounded-full transition-colors font-medium border border-brand/20"
+            >
+              Autofill Demo Login
+            </button>
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-1">Email <span className="text-danger">*</span></label>
