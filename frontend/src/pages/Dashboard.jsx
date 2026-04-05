@@ -5,6 +5,7 @@ import BufferHealthTracker from '../components/dashboard/BufferHealthTracker';
 import TaxTracker from '../components/dashboard/TaxTracker';
 import WindfallStabilizer from '../components/dashboard/WindfallStabilizer';
 import TransactionModal from '../components/dashboard/TransactionModal';
+import TriageModal from '../components/dashboard/TriageModal';
 
 export default function Dashboard() {
   const [summary, setSummary] = useState(null);
@@ -13,6 +14,7 @@ export default function Dashboard() {
   const [error, setError] = useState(null);
   const [showLogModal, setShowLogModal] = useState(false);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
+  const [showTriageModal, setShowTriageModal] = useState(false);
   const [balances, setBalances] = useState({ available_cash: 0, current_buffer: 0 });
 
   const fetchData = async () => {
@@ -83,7 +85,10 @@ export default function Dashboard() {
             <span className="text-xl">⚠️</span>
             <p className="text-xs font-bold uppercase tracking-widest">SURVIVAL MODE ACTIVE: Your expenses exceed your safe cash.</p>
           </div>
-          <button className="px-4 py-1.5 bg-red-500 text-white rounded-sm text-[10px] font-bold uppercase tracking-widest hover:bg-red-600 transition-all">
+          <button 
+            onClick={() => setShowTriageModal(true)}
+            className="px-4 py-1.5 bg-red-500 text-white rounded-sm text-[10px] font-bold uppercase tracking-widest hover:bg-red-600 transition-all"
+          >
             View Triage Plans
           </button>
         </div>
@@ -271,6 +276,13 @@ export default function Dashboard() {
           </div>
         </div>
       )}
+      
+      {/* Triage Modal */}
+      <TriageModal 
+        isOpen={showTriageModal} 
+        onClose={() => setShowTriageModal(false)}
+        summary={summary}
+      />
     </div>
   );
 }
