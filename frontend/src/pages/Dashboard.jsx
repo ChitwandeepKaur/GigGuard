@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Settings } from 'lucide-react';
 import api from '../services/api';
 import SafeToSpendWidget from '../components/dashboard/SafeToSpendWidget';
 import BufferHealthTracker from '../components/dashboard/BufferHealthTracker';
@@ -132,15 +133,23 @@ export default function Dashboard() {
 
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 mb-8">
         <div>
-          <h2 className="text-3xl sm:text-4xl font-display text-brand font-bold">Dashboard</h2>
+          <div className="flex items-center gap-3">
+            <h2 className="text-3xl sm:text-4xl font-display text-brand font-bold">Dashboard</h2>
+            {summary?.currentWeek && (
+              <span className="px-2 py-0.5 bg-brand/10 text-brand border border-brand/20 rounded text-[10px] font-bold uppercase tracking-widest mt-1">
+                Week {summary.currentWeek}
+              </span>
+            )}
+          </div>
           <p className="text-app-muted text-xs sm:text-sm font-mono mt-1 uppercase tracking-widest">Financial Wellness Control Center</p>
         </div>
         <div className="flex gap-3 sm:gap-4 w-full sm:w-auto">
           <button 
             onClick={() => setShowUpdateModal(true)}
-            className="flex-1 sm:flex-none px-4 py-2 text-app-muted text-[10px] font-bold rounded-sm border border-app-border hover:bg-app-muted/5 transition-all uppercase tracking-widest"
+            className="p-2 text-app-muted hover:bg-app-muted/10 rounded-sm transition-all border border-app-border hover:border-brand group shadow-sm flex items-center justify-center h-[38px] w-[38px]"
+            title="Adjust Balances"
           >
-            Adjust Balance
+            <Settings size={18} className="group-hover:rotate-45 transition-transform" />
           </button>
           <button 
             onClick={() => setShowLogModal(true)}
@@ -175,6 +184,7 @@ export default function Dashboard() {
             availableCash={summary?.availableCash}
             billsDue={summary?.billsDueThisWeek}
             taxReserve={summary?.taxReserve}
+            currentWeek={summary?.currentWeek}
             bufferGap={Math.max(0, (summary?.emergencyBufferTarget || 0) - (summary?.currentBuffer || 0))}
           />
           

@@ -15,7 +15,7 @@ const LABELS = {
   danger: 'Overspending danger',
 };
 
-export default function SafeToSpendWidget({ amount, state, billsDue, availableCash, taxReserve = 0, bufferGap = 0 }) {
+export default function SafeToSpendWidget({ amount, state, billsDue, availableCash, currentWeek, taxReserve = 0, bufferGap = 0 }) {
   const [showMath, setShowMath] = useState(false);
   
   const bgColor = COLORS[state] || COLORS.safe;
@@ -31,7 +31,7 @@ export default function SafeToSpendWidget({ amount, state, billsDue, availableCa
       <div className="flex flex-wrap justify-between items-start gap-4">
         <div>
           <h3 className="text-[10px] sm:text-sm font-mono uppercase tracking-widest opacity-90 font-bold flex items-center gap-2">
-            Safe-to-Spend This Week
+            Safe to Spend {currentWeek ? `(Week ${currentWeek})` : 'This Week'}
           </h3>
           <p className="text-4xl sm:text-5xl font-bold mt-2 font-display">
             ${amount?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}

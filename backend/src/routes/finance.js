@@ -192,6 +192,9 @@ router.get('/summary', async (req, res, next) => {
     const totalTaxOwed = recentIncome.reduce((s, e) => s + (e.amount * 0.153 * 0.9), 0);
     const nextDeadline = getNextTaxDeadline();
 
+    const dayOfMonth = now.getDate();
+    const currentWeek = Math.min(4, Math.ceil(dayOfMonth / 7));
+
     res.json({
       safeToSpend,
       safeToSpendState: getSafeToSpendState(safeToSpend, expenses.survival_number, avgFlexible),
@@ -210,6 +213,7 @@ router.get('/summary', async (req, res, next) => {
       floorIncome: profile.floor_income,
       volatilityScore: profile.volatility_score,
       thisWeekIncome,
+      currentWeek,
       isSurvivalMode: thisWeekIncome < profile.floor_income,
       recentIncome,
       expenses // Include full expense profile for billing UI
