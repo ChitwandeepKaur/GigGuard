@@ -6,7 +6,7 @@ import api from '../../services/api';
 export default function InsuranceStep({ formData, isSubmitting, onComplete, onBack }) {
   const [showSnapshot, setShowSnapshot] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
-  const [recommendations, setRecommendations] = useState([]);
+  const [recommendationData, setRecommendationData] = useState(null);
   const [error, setError] = useState('');
 
   const getNum = (v) => Number(v) || 0;
@@ -37,7 +37,7 @@ export default function InsuranceStep({ formData, isSubmitting, onComplete, onBa
     let mounted = true;
     try {
       const response = await api.post('/api/ai/recommendation/preview', formData);
-      if (mounted) setRecommendations(response.data);
+      if (mounted) setRecommendationData(response.data);
     } catch (err) {
       console.error('Failed to fetch recommendations:', err);
       if (mounted) setError('Failed to securely generate AI recommendations. You can still complete your setup below.');
@@ -109,16 +109,29 @@ export default function InsuranceStep({ formData, isSubmitting, onComplete, onBa
     return (
       <div className="py-6 text-left animate-in slide-in-from-right-4 duration-500">
         <h2 className="text-2xl font-syne text-brand mb-2">Your Custom AI Protection Plan</h2>
+        
+        {recommendationData?.coverageGapScore && (
+          <div className="mb-6 p-4 rounded-xl border border-red-500/20 bg-red-50/50 shadow-sm flex items-center justify-between">
+            <div>
+              <h3 className="text-xs text-red-600 uppercase tracking-wider font-bold mb-1">Overall Profile Evaluation</h3>
+              <p className="text-sm text-gray-700 font-medium">Coverage Gap Score</p>
+            </div>
+            <div className="text-2xl font-bold bg-white px-4 py-2 rounded-lg border border-red-100 shadow-sm">
+              {recommendationData.coverageGapScore}
+            </div>
+          </div>
+        )}
+
         <p className="text-gray-500 mb-6 text-sm">
-          Based on your gig work profile, Gemini recommends these coverages to close your income gaps:
+          Based on your gig work profile, Gemini recommends these State Farm coverages to close your income gaps:
         </p>
 
         {error && <div className="p-3 mb-4 bg-red-50 text-red-600 rounded text-sm">{error}</div>}
 
         <div className="space-y-4 max-h-[50vh] overflow-y-auto pr-2">
-          {recommendations.length > 0 ? (
-            recommendations.map((rec, i) => (
-              <div key={i} className="p-4 border border-gray-100 rounded-xl bg-gray-50 hover:border-brand/30 transition-colors shadow-sm">
+          {recommendationData?.recommendations?.length > 0 ? (
+            recommendationData.recommendations.map((rec, i) => (
+              <div key={i} className="p-4 border border-gray-200 border-l-4 border-l-red-500 rounded-xl bg-white hover:border-red-500/50 transition-colors shadow-sm">
                 <div className="flex justify-between items-start mb-2">
                   <h3 className="font-bold text-gray-800">{rec.product}</h3>
                   <span className={`text-xs px-2 py-1 rounded-full font-semibold uppercase tracking-wider ${
@@ -130,8 +143,8 @@ export default function InsuranceStep({ formData, isSubmitting, onComplete, onBa
                   </span>
                 </div>
                 <p className="text-sm text-gray-600 mb-3"><span className="font-semibold text-gray-700">Why:</span> {rec.reason}</p>
-                <div className="bg-white p-3 rounded-md border border-gray-100 text-sm">
-                  <span className="font-semibold text-brand text-xs uppercase tracking-wider block mb-1">Coverage Gap Fixed:</span>
+                <div className="bg-gray-50 p-3 rounded-md border border-gray-100 text-sm">
+                  <span className="font-semibold text-red-600 text-xs uppercase tracking-wider block mb-1">Coverage Gap Fixed:</span>
                   <span className="text-gray-600 italic">"{rec.gap_description}"</span>
                 </div>
               </div>

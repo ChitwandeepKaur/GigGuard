@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import api from '../services/api';
 import { useStore } from '../store';
-import { Upload, FileText, CheckCircle, Loader2, ShieldCheck, XCircle, DollarSign, Calendar, Target, Brain } from 'lucide-react';
+import { Upload, FileText, CheckCircle, Loader2, ShieldCheck, XCircle, DollarSign, Calendar, Target, Brain, AlertTriangle } from 'lucide-react';
 import QuizGame from '../components/insurance/QuizGame';
 
 export default function InsuranceHub() {
@@ -65,7 +65,7 @@ export default function InsuranceHub() {
               </button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                {/* Covered Card */}
                <div className="bg-green-500/5 border border-green-500/20 rounded-2xl p-6">
                   <div className="flex items-center gap-3 mb-4 text-green-500">
@@ -100,6 +100,25 @@ export default function InsuranceHub() {
                     ))}
                     {(!policySummary.notCovered || policySummary.notCovered.length === 0) && (
                        <li className="text-sm text-app-muted italic">No exclusions extracted.</li>
+                    )}
+                  </ul>
+               </div>
+
+               {/* Hidden Terms Card */}
+               <div className="bg-orange-500/5 border border-orange-500/20 rounded-2xl p-6">
+                  <div className="flex items-center gap-3 mb-4 text-orange-500">
+                    <AlertTriangle size={28} />
+                    <h5 className="font-semibold text-lg">Hidden Terms</h5>
+                  </div>
+                  <ul className="space-y-3">
+                    {policySummary.hiddenTerms?.map((item, i) => (
+                       <li key={i} className="flex items-start gap-2 text-sm text-app-text">
+                         <span className="text-orange-500 mt-0.5">•</span>
+                         <span className="leading-relaxed">{item}</span>
+                       </li>
+                    ))}
+                    {(!policySummary.hiddenTerms || policySummary.hiddenTerms.length === 0) && (
+                       <li className="text-sm text-app-muted italic">No hidden terms extracted.</li>
                     )}
                   </ul>
                </div>

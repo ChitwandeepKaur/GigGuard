@@ -38,6 +38,7 @@ Your output must be strict JSON matching this schema:
 {
   "isCovered": ["bullet 1", "bullet 2", "bullet 3"],
   "notCovered": ["bullet 1", "bullet 2"],
+  "hiddenTerms": ["term 1", "term 2"], // hidden terms/conditions that could increase insurance in the future
   "deductible": "$500", // or "Not specified in document"
   "coverageLimits": "$100,000", // or "Not specified in document"
   "renewalDate": "YYYY-MM-DD" // or "Not specified in document"
@@ -60,6 +61,7 @@ Important rules:
       return {
         isCovered: [],
         notCovered: ["Error parsing policy data."],
+        hiddenTerms: [],
         deductible: "Not specified in document",
         coverageLimits: "Not specified in document",
         renewalDate: "Not specified in document"
@@ -76,16 +78,21 @@ export async function getInsuranceRecommendation(profileData) {
   const model = getModel(true)
 
   const systemInstruction = `You are a financial and insurance advisor for gig workers.
-Based on the following gig worker profile, recommend exactly 3 insurance products that would best protect them.
+Based on the following gig worker profile, evaluate their coverage gap and recommend exactly 3 insurance products that would best protect them.
+IMPORTANT: Any insurance product recommended MUST be a "State Farm" product (e.g., "State Farm Rideshare Insurance", "State Farm Personal Articles Policy").
+
 Output must be a strict JSON strictly matching this schema:
-[
-  {
-    "product": "Product Name (e.g. Rideshare Endorsement)",
-    "reason": "Why they need this specifically based on their provided data.",
-    "priority": "high",
-    "gap_description": "What financial gap this covers (e.g. 'Covers the gap between app-provided insurance and personal auto')"
-  }
-]`;
+{
+  "coverageGapScore": "🔴 Vulnerable", // Must be one of: "🔴 Vulnerable", "🟡 Partial", or "🟢 Protected"
+  "recommendations": [
+    {
+      "product": "Product Name (e.g. State Farm Rideshare Insurance)",
+      "reason": "Why they need this specifically based on their provided data.",
+      "priority": "high",
+      "gap_description": "What financial gap this covers (e.g. 'Covers the gap between app-provided insurance and personal auto')"
+    }
+  ]
+}`;
 
   const prompt = `${systemInstruction}\n\n--- USER PROFILE ---\n${JSON.stringify(profileData, null, 2)}`;
 
@@ -94,11 +101,10 @@ Output must be a strict JSON strictly matching this schema:
     const response = await result.response;
     const jsonString = response.text();
     try {
-      const parsed = JSON.parse(jsonString);
-      return Array.isArray(parsed) ? parsed : Object.values(parsed);
+      return JSON.parse(jsonString);
     } catch (parseError) {
       console.error('Failed to parse Gemini output as JSON:', jsonString);
-      return [];
+      return { coverageGapScore: "🟡 Partial", recommendations: [] };
     }
   } catch (error) {
     console.error('Error getting insurance recommendation:', error);
