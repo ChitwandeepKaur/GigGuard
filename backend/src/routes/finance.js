@@ -177,6 +177,8 @@ router.get('/summary', async (req, res, next) => {
       nextTaxDeadline: nextDeadline,
       windfall,
       goodWeekThreshold: profile.best_week,
+      floorIncome: profile.floor_income,
+      volatilityScore: profile.volatility_score,
       thisWeekIncome,
       isSurvivalMode: thisWeekIncome < profile.floor_income,
       recentIncome

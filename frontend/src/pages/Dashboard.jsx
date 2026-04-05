@@ -140,16 +140,30 @@ export default function Dashboard() {
           <div className="mt-8 bg-app-card p-6 rounded-card border border-app-border">
              <h3 className="text-xs font-mono text-app-muted uppercase tracking-widest mb-4">Quick Income Tracker (This Week)</h3>
              
-             <div className="flex items-center gap-4">
+             <div className="flex items-center gap-4 mb-6">
                 <div className="flex-1 h-3 bg-app-muted/10 rounded-full overflow-hidden">
                   <div 
                     className="h-full bg-brand" 
-                    style={{ width: `${Math.min(100, (summary?.thisWeekIncome / summary?.goodWeekThreshold) * 100)}%` }}
+                    style={{ width: `${Math.min(100, ((summary?.thisWeekIncome || 0) / (summary?.goodWeekThreshold || 1)) * 100)}%` }}
                   />
                 </div>
                 <p className="font-mono font-bold text-lg">${summary?.thisWeekIncome?.toLocaleString()}</p>
              </div>
-             <p className="text-[10px] text-app-muted mt-2">Target for a "Good Week": ${summary?.goodWeekThreshold?.toLocaleString()}</p>
+             
+             <div className="pt-4 border-t border-app-border grid grid-cols-3 gap-2 text-center divide-x divide-app-border/50 bg-app-muted/5 -mx-6 -mb-6 p-4 rounded-b-card">
+               <div>
+                 <p className="text-[9px] uppercase font-mono text-app-muted mb-1">Worst Week</p>
+                 <p className="font-bold text-sm text-rose-500">${summary?.floorIncome?.toLocaleString()}</p>
+               </div>
+               <div>
+                 <p className="text-[9px] uppercase font-mono text-app-muted mb-1">Best Week</p>
+                 <p className="font-bold text-sm text-emerald-500">${summary?.goodWeekThreshold?.toLocaleString()}</p>
+               </div>
+               <div>
+                 <p className="text-[9px] uppercase font-mono text-app-muted mb-1">Volatility Score</p>
+                 <p className="font-bold text-sm text-amber-500">{summary?.volatilityScore ? Math.round(summary.volatilityScore) : 0} <span className="text-[9px] uppercase opacity-70">(High)</span></p>
+               </div>
+             </div>
           </div>
         </div>
 
