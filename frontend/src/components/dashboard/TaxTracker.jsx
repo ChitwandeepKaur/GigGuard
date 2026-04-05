@@ -15,7 +15,7 @@ export default function TaxTracker({ owed, deadline, penalty }) {
           </p>
           <p className="text-[10px] text-app-muted uppercase tracking-widest mt-1">Total Owed (15.3%)</p>
         </div>
-        <div className={`text-right ${isUrgent ? 'text-red-500 animate-pulse' : 'text-amber-600'}`}>
+        <div className={`text-right ${isUrgent ? 'text-red-500 animate-pulse font-black' : 'text-amber-600'}`}>
           <p className="text-3xl font-black font-mono tracking-tighter">{daysLeft}</p>
           <p className="text-[10px] uppercase font-bold">Days Left</p>
         </div>

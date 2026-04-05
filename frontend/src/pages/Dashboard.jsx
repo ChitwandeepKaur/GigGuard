@@ -76,7 +76,19 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="p-4 sm:p-8 bg-app-bg min-h-screen max-w-7xl mx-auto pb-24">
+    <div className="p-4 sm:p-8 bg-app-bg min-h-screen max-w-7xl mx-auto pb-24 relative">
+      {summary?.safeToSpend < 0 && (
+        <div className="bg-red-500/10 border-b border-red-500 mb-8 p-4 rounded-sm flex items-center justify-between text-red-500">
+          <div className="flex items-center gap-2">
+            <span className="text-xl">⚠️</span>
+            <p className="text-xs font-bold uppercase tracking-widest">SURVIVAL MODE ACTIVE: Your expenses exceed your safe cash.</p>
+          </div>
+          <button className="px-4 py-1.5 bg-red-500 text-white rounded-sm text-[10px] font-bold uppercase tracking-widest hover:bg-red-600 transition-all">
+            View Triage Plans
+          </button>
+        </div>
+      )}
+
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 mb-8">
         <div>
           <h2 className="text-3xl sm:text-4xl font-display text-brand font-bold">Dashboard</h2>
@@ -99,7 +111,7 @@ export default function Dashboard() {
       </div>
 
       {/* Windfall Stabilizer */}
-      {summary?.windfall && (
+      {summary?.windfall && summary?.safeToSpend >= 0 && (
         <div className="mb-8">
           <WindfallStabilizer 
             excess={summary.windfall.excess} 
@@ -121,10 +133,13 @@ export default function Dashboard() {
             state={summary?.safeToSpendState}
             availableCash={summary?.availableCash}
             billsDue={summary?.billsDueThisWeek}
+            taxReserve={summary?.taxReserve}
+            bufferGap={Math.max(0, (summary?.emergencyBufferTarget || 0) - (summary?.currentBuffer || 0))}
           />
           
           <div className="mt-8 bg-app-card p-6 rounded-card border border-app-border">
              <h3 className="text-xs font-mono text-app-muted uppercase tracking-widest mb-4">Quick Income Tracker (This Week)</h3>
+             
              <div className="flex items-center gap-4">
                 <div className="flex-1 h-3 bg-app-muted/10 rounded-full overflow-hidden">
                   <div 

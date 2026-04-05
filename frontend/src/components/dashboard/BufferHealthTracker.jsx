@@ -68,7 +68,7 @@ export default function BufferHealthTracker({ weeks, currentBuffer, targetBuffer
 
       {gap > 0 && (
         <div className="mt-8 p-3 bg-brand/5 border border-brand/10 rounded-sm italic text-xs text-brand/80">
-          Tip: Save <strong>${(gap / 4).toLocaleString()} extra</strong> this week to reach safety in a month.
+          Tip: Save <strong>${(gap / 4).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} extra</strong> this week to reach safety in a month.
         </div>
       )}
       {gap <= 0 && (
