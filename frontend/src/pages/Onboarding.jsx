@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import IncomeProfiler from '../components/onboarding/IncomeProfiler';
 import ExpenseSetup from '../components/onboarding/ExpenseSetup';
@@ -11,25 +11,39 @@ export default function Onboarding() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
 
-  const [formData, setFormData] = useState({
-    gig_types: [],
-    income_frequency: 'weekly',
-    weekly_low: '',
-    weekly_high: '',
-    worst_week: '',
-    best_week: '',
-    rent: '',
-    utilities: '',
-    debt_minimums: '',
-    transport: '',
-    groceries: '',
-    insurance_cost: '',
-    phone: '',
-    subscriptions: '',
-    eating_out: '',
-    shopping: '',
-    entertainment: ''
+  const [formData, setFormData] = useState(() => {
+    const savedDraft = localStorage.getItem('onboardingDraft');
+    if (savedDraft) {
+      try {
+        return JSON.parse(savedDraft);
+      } catch (e) {
+        console.error("Failed to parse saved draft:", e);
+      }
+    }
+    return {
+      gig_types: [],
+      income_frequency: 'weekly',
+      weekly_low: '',
+      weekly_high: '',
+      worst_week: '',
+      best_week: '',
+      rent: '',
+      utilities: '',
+      debt_minimums: '',
+      transport: '',
+      groceries: '',
+      insurance_cost: '',
+      phone: '',
+      subscriptions: '',
+      eating_out: '',
+      shopping: '',
+      entertainment: ''
+    };
   });
+
+  useEffect(() => {
+    localStorage.setItem('onboardingDraft', JSON.stringify(formData));
+  }, [formData]);
 
   const nextStep = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -53,6 +67,7 @@ export default function Onboarding() {
     setError('');
     try {
       await api.post('/api/user/profile', formData);
+      localStorage.removeItem('onboardingDraft');
       navigate('/dashboard');
     } catch (err) {
       console.error(err);

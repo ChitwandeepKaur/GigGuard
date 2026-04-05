@@ -56,6 +56,7 @@ export default function Auth() {
         try {
           await api.post('/api/user/profile', pendingData);
           localStorage.removeItem('pendingProfile');
+          localStorage.removeItem('onboardingDraft');
         } catch (saveErr) {
           console.error("Failed to save pending profile:", saveErr);
         }

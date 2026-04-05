@@ -10,6 +10,9 @@ const Navbar = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAuthenticating, setIsAuthenticating] = useState(!!localStorage.getItem('token'));
+  
+  const [showOnboardingAlert, setShowOnboardingAlert] = useState(false);
+  const [pendingAction, setPendingAction] = useState(null); // { type: 'NAVIGATE' | 'LOGOUT', path?: string }
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -37,7 +40,16 @@ const Navbar = () => {
     setIsMenuOpen(false); // Close menu on navigation
   }, [location.pathname]); // Re-runs when the user navigates (e.g. after login)
 
-  const handleLogout = async () => {
+  const handleLogoutRequest = () => {
+    if (location.pathname === '/onboarding') {
+      setPendingAction({ type: 'LOGOUT' });
+      setShowOnboardingAlert(true);
+    } else {
+      executeLogout();
+    }
+  };
+
+  const executeLogout = async () => {
     try {
       await api.post('/api/auth/logout');
     } catch(e) {
@@ -47,6 +59,14 @@ const Navbar = () => {
     localStorage.removeItem('refreshToken');
     setUser(null);
     navigate('/');
+  };
+
+  const handleNavClick = (e, path) => {
+    if (location.pathname === '/onboarding' && path !== '/onboarding') {
+      e.preventDefault();
+      setPendingAction({ type: 'NAVIGATE', path });
+      setShowOnboardingAlert(true);
+    }
   };
 
   const isLoggedIn = !!localStorage.getItem('token');
@@ -66,7 +86,11 @@ const Navbar = () => {
         <div className="flex justify-between h-16">
           <div className="flex">
             <div className="flex-shrink-0 flex items-center">
-              <Link to="/" className="text-brand font-display font-bold text-xl">
+              <Link 
+                to="/" 
+                onClick={(e) => handleNavClick(e, '/')}
+                className="text-brand font-display font-bold text-xl"
+              >
                 GigGuard
               </Link>
             </div>
@@ -75,6 +99,7 @@ const Navbar = () => {
                 <Link
                   key={link.path}
                   to={link.path}
+                  onClick={(e) => handleNavClick(e, link.path)}
                   className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
                     location.pathname === link.path
                       ? 'border-brand text-brand'
@@ -115,7 +140,7 @@ const Navbar = () => {
                         <span className="font-medium text-gray-900 truncate block">{user.email}</span>
                       </div>
                       <button
-                        onClick={handleLogout}
+                        onClick={handleLogoutRequest}
                         className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors"
                       >
                         Logout
@@ -125,7 +150,10 @@ const Navbar = () => {
                 </div>
               ) : (
                 <button 
-                  onClick={() => navigate('/auth')}
+                  onClick={(e) => {
+                    handleNavClick(e, '/auth');
+                    if (!e.defaultPrevented) navigate('/auth');
+                  }}
                   className="ml-4 px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-brand hover:bg-brand-dark focus:outline-none"
                 >
                   Login / Signup
@@ -152,6 +180,10 @@ const Navbar = () => {
              <Link
               key={link.path}
               to={link.path}
+              onClick={(e) => {
+                handleNavClick(e, link.path);
+                if (!e.defaultPrevented) setIsMenuOpen(false);
+              }}
               className={`block pl-3 pr-4 py-3 border-l-4 text-base font-medium transition-all ${
                 location.pathname === link.path
                   ? 'bg-brand/5 border-brand text-brand'
@@ -178,7 +210,7 @@ const Navbar = () => {
               </div>
               <div className="mt-3 space-y-1">
                 <button
-                  onClick={handleLogout}
+                  onClick={handleLogoutRequest}
                   className="block w-full text-left px-4 py-2 text-base font-medium text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors flex items-center gap-2"
                 >
                   <LogOut size={18} />
@@ -191,7 +223,10 @@ const Navbar = () => {
           {!user && !isAuthenticating && (
             <div className="p-4">
               <button 
-                onClick={() => navigate('/auth')}
+                onClick={(e) => {
+                  handleNavClick(e, '/auth');
+                  if (!e.defaultPrevented) navigate('/auth');
+                }}
                 className="w-full px-4 py-3 border border-transparent rounded-xl shadow-sm text-base font-medium text-white bg-brand hover:bg-brand-dark focus:outline-none text-center"
               >
                 Login / Signup
@@ -200,6 +235,42 @@ const Navbar = () => {
           )}
         </div>
       </div>
+
+      {/* Onboarding Nav Alert Modal */}
+      {showOnboardingAlert && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
+          <div className="bg-app-card rounded-xl shadow-2xl p-6 max-w-sm w-full border border-app-border animate-in zoom-in-95 duration-200">
+            <h3 className="text-xl font-display font-bold text-gray-900 mb-2">Leave Onboarding?</h3>
+            <p className="text-gray-500 mb-6 font-body text-sm">
+              Your form data is already saved.
+            </p>
+            <div className="flex flex-col gap-3">
+              <button 
+                onClick={() => {
+                  setShowOnboardingAlert(false);
+                  if (pendingAction?.type === 'LOGOUT') {
+                    executeLogout();
+                  } else if (pendingAction?.type === 'NAVIGATE' && pendingAction.path) {
+                    navigate(pendingAction.path);
+                  }
+                }}
+                className="w-full bg-brand text-white py-3 rounded-lg font-medium hover:bg-brand-dark transition-colors border border-transparent"
+              >
+                Save and Continue
+              </button>
+              <button 
+                onClick={() => {
+                  setShowOnboardingAlert(false);
+                  setPendingAction(null);
+                }}
+                className="w-full bg-app-bg text-app-text border border-app-border py-3 rounded-lg font-medium hover:bg-gray-100 transition-colors"
+              >
+                Go Back to Onboarding
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </nav>
   );
 };

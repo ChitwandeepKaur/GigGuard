@@ -12,6 +12,7 @@ export default function Dashboard() {
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [onboardingIncomplete, setOnboardingIncomplete] = useState(false);
   const [showLogModal, setShowLogModal] = useState(false);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [showTriageModal, setShowTriageModal] = useState(false);
@@ -20,6 +21,18 @@ export default function Dashboard() {
   const fetchData = async () => {
     try {
       setLoading(true);
+      
+      // Check if user has completed onboarding by fetching their profile
+      try {
+        await api.get('/api/user/profile');
+      } catch (profileErr) {
+        if (profileErr.response?.status === 404) {
+          setOnboardingIncomplete(true);
+          setLoading(false);
+          return;
+        }
+      }
+
       const [summaryRes, historyRes] = await Promise.all([
         api.get('/api/finance/summary'),
         api.get('/api/finance/transactions')
@@ -72,6 +85,26 @@ export default function Dashboard() {
       <div className="p-8 bg-app-bg min-h-screen">
         <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-md">
           {error}
+        </div>
+      </div>
+    );
+  }
+
+  if (onboardingIncomplete) {
+    return (
+      <div className="p-8 bg-app-bg min-h-screen flex flex-col items-center justify-center">
+        <div className="bg-app-card border border-app-border p-8 rounded-card max-w-md text-center shadow-lg">
+          <div className="text-4xl mb-4">🔒</div>
+          <h2 className="text-2xl font-display font-bold text-brand mb-2">Dashboard Locked</h2>
+          <p className="text-gray-500 mb-6 font-body">
+            The dashboard can only be unlocked once you have completed onboarding. Please finish your profile setup to access your financial tools.
+          </p>
+          <a 
+            href="/onboarding"
+            className="inline-block w-full bg-brand text-white py-3 rounded-lg font-medium hover:bg-brand-dark transition-colors"
+          >
+            Complete Onboarding
+          </a>
         </div>
       </div>
     );
