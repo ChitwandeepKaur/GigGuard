@@ -20,87 +20,76 @@ async function main() {
   const user = await prisma.user.create({
     data: {
       email: 'marcus@demo.com',
-      passwordHash,
+      password_hash: passwordHash,
     }
   })
   console.log('Created user:', user.email)
 
   // ─── USER PROFILE ───────────────────────────────────────────────
   // Marcus: DoorDash + Uber driver, weekly income varies a lot
-  // floor = worst week, average = (low+high)/2, volatility = (high-low)/avg * 100
   const weeklyLow = 800
   const weeklyHigh = 1800
   const worstWeek = 620
   const bestWeek = 2100
-  const averageIncome = (weeklyLow + weeklyHigh) / 2          // 1300
-  const floorIncome = worstWeek                                // 620
-  const volatilityScore = ((weeklyHigh - weeklyLow) / averageIncome) * 100  // 76.9
+  const averageIncome = (weeklyLow + weeklyHigh) / 2
+  const floorIncome = worstWeek
+  const volatilityScore = ((weeklyHigh - weeklyLow) / averageIncome) * 100
 
   const profile = await prisma.userProfile.create({
     data: {
       userId: user.id,
-      gigTypes: ['rideshare', 'delivery'],
-      incomeFrequency: 'weekly',
-      weeklyLow,
-      weeklyHigh,
-      worstWeek,
-      bestWeek,
-      floorIncome,
-      averageIncome,
-      volatilityScore,
+      gig_types: ['rideshare', 'delivery'],
+      income_frequency: 'weekly',
+      weekly_low: weeklyLow,
+      weekly_high: weeklyHigh,
+      worst_week: worstWeek,
+      best_week: bestWeek,
+      floor_income: floorIncome,
+      average_income: averageIncome,
+      volatility_score: volatilityScore,
+      available_cash: 820,
+      current_buffer: 884
     }
   })
   console.log('Created user profile — volatility score:', volatilityScore.toFixed(1))
 
   // ─── EXPENSE PROFILE ────────────────────────────────────────────
-  // All values are WEEKLY amounts (monthly / 4.33)
-  // Non-negotiable
-  const rent = 1200 / 4.33           // ~277  (monthly $1,200)
-  const utilities = 120 / 4.33       // ~28   (monthly $120)
-  const debtMinimums = 250 / 4.33    // ~58   (monthly $250 — car payment)
-  const transport = 200 / 4.33       // ~46   (monthly $200 — gas)
-  const groceries = 300 / 4.33       // ~69   (monthly $300)
-  const insuranceCost = 180 / 4.33   // ~42   (monthly $180 — auto insurance)
+  const rent = 1200 / 4.33
+  const utilities = 120 / 4.33
+  const debtMinimums = 250 / 4.33
+  const transport = 200 / 4.33
+  const groceries = 300 / 4.33
+  const insuranceCost = 180 / 4.33
 
-  // Semi-flexible
-  const phone = 80 / 4.33            // ~18
-  const subscriptions = 40 / 4.33    // ~9    (Netflix, Spotify)
-  const childcare = 0                // no kids
+  const phone = 80 / 4.33
+  const subscriptions = 40 / 4.33
 
-  // Fully flexible
-  const eatingOut = 200 / 4.33       // ~46
-  const shopping = 100 / 4.33        // ~23
-  const entertainment = 60 / 4.33    // ~14
+  const eatingOut = 200 / 4.33
+  const shopping = 100 / 4.33
+  const entertainment = 60 / 4.33
 
-  // Survival number = non-negotiables only / 4.33 (already weekly here)
   const survivalNumber = rent + utilities + debtMinimums + transport + groceries + insuranceCost
-  // ≈ 520/week
 
   const expenses = await prisma.expenseProfile.create({
     data: {
       userId: user.id,
       rent: parseFloat(rent.toFixed(2)),
       utilities: parseFloat(utilities.toFixed(2)),
-      debtMinimums: parseFloat(debtMinimums.toFixed(2)),
+      debt_minimums: parseFloat(debtMinimums.toFixed(2)),
       transport: parseFloat(transport.toFixed(2)),
       groceries: parseFloat(groceries.toFixed(2)),
-      insuranceCost: parseFloat(insuranceCost.toFixed(2)),
+      insurance_cost: parseFloat(insuranceCost.toFixed(2)),
       phone: parseFloat(phone.toFixed(2)),
       subscriptions: parseFloat(subscriptions.toFixed(2)),
-      childcare: 0,
-      eatingOut: parseFloat(eatingOut.toFixed(2)),
+      eating_out: parseFloat(eatingOut.toFixed(2)),
       shopping: parseFloat(shopping.toFixed(2)),
       entertainment: parseFloat(entertainment.toFixed(2)),
-      survivalNumber: parseFloat(survivalNumber.toFixed(2)),
+      survival_number: parseFloat(survivalNumber.toFixed(2)),
     }
   })
   console.log('Created expense profile — survival number: $' + survivalNumber.toFixed(0) + '/week')
 
   // ─── INCOME ENTRIES ─────────────────────────────────────────────
-  // 12 weeks of history — realistic feast/famine pattern
-  // weekOf = Monday of that week
-  // Most recent week intentionally left blank so user can log it live in the demo
-
   const getMonday = (weeksAgo) => {
     const d = new Date()
     d.setHours(0, 0, 0, 0)
@@ -111,7 +100,6 @@ async function main() {
   }
 
   const incomeHistory = [
-    // weeks ago, amount, source, note
     { weeksAgo: 12, amount: 920,  source: 'doordash',  note: 'Normal week' },
     { weeksAgo: 11, amount: 1540, source: 'uber',      note: 'Busy weekend' },
     { weeksAgo: 10, amount: 680,  source: 'doordash',  note: 'Sick mid-week' },
@@ -124,7 +112,6 @@ async function main() {
     { weeksAgo: 3,  amount: 2050, source: 'both',      note: 'Concert weekend' },
     { weeksAgo: 2,  amount: 1350, source: 'doordash',  note: null },
     { weeksAgo: 1,  amount: 1480, source: 'uber',      note: 'Good week' },
-    // Week 0 (this week) = intentionally empty — user logs it live in demo
   ]
 
   for (const entry of incomeHistory) {
@@ -132,35 +119,33 @@ async function main() {
       data: {
         userId: user.id,
         amount: entry.amount,
-        weekOf: getMonday(entry.weeksAgo),
+        week_of: getMonday(entry.weeksAgo),
         source: entry.source,
         note: entry.note,
       }
     })
   }
   console.log('Created', incomeHistory.length, 'income entries')
-  console.log('  Note: current week is EMPTY — user logs it live during demo')
 
   // ─── INSURANCE RECOMMENDATIONS ──────────────────────────────────
-  // Pre-generated so they appear instantly without waiting for Claude
   const recommendations = [
     {
       product: 'Rideshare/delivery driver endorsement',
       reason: 'Your personal auto policy does not cover accidents while you are actively driving for DoorDash or Uber. This gap means a single fender-bender on the job could leave you with zero coverage.',
       priority: 'high',
-      gapDescription: 'Personal auto policy void during gig work — highest risk exposure for your profile',
+      gap_description: 'Personal auto policy void during gig work — highest risk exposure for your profile',
     },
     {
       product: 'Occupational accident insurance',
       reason: 'As a 1099 contractor you have no workers comp. If you are injured on the job — a slip, a crash, a dog bite on delivery — you pay all medical costs out of pocket. This policy fills that gap for under $50/month.',
       priority: 'high',
-      gapDescription: 'No employer workers comp — injury could wipe out your buffer entirely',
+      gap_description: 'No employer workers comp — injury could wipe out your buffer entirely',
     },
     {
       product: 'Short-term disability insurance',
       reason: 'If you cannot drive for 2+ weeks due to illness or injury you earn zero. With a volatility score of 76.9 and only 1.7 bad weeks of buffer, even a minor health event could spiral into missed rent.',
       priority: 'medium',
-      gapDescription: 'Income fully stops if unable to work — no safety net beyond current buffer',
+      gap_description: 'Income fully stops if unable to work — no safety net beyond current buffer',
     },
   ]
 
