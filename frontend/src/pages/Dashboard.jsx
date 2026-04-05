@@ -269,7 +269,8 @@ export default function Dashboard() {
       <TransactionModal 
         isOpen={showLogModal} 
         onClose={() => setShowLogModal(false)} 
-        onUpdate={fetchData} 
+        onUpdate={fetchData}
+        summary={summary}
       />
 
       {/* Adjustment Modal (Old Update Balances) */}

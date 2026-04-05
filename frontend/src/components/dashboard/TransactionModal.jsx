@@ -1,9 +1,14 @@
 import React, { useState } from 'react';
 import api from '../../services/api';
 
-export default function TransactionModal({ isOpen, onClose, onUpdate }) {
+export default function TransactionModal({ isOpen, onClose, onUpdate, summary }) {
   const [activeTab, setActiveTab] = useState('income');
   const [loading, setLoading] = useState(false);
+  const [step, setStep] = useState(1);
+  const [suggestedSavings, setSuggestedSavings] = useState(0);
+  const [savingsReason, setSavingsReason] = useState('');
+  const [isSubmittingPhase2, setIsSubmittingPhase2] = useState(false);
+
   const [formData, setFormData] = useState({
     amount: '',
     source: '',
@@ -14,21 +19,12 @@ export default function TransactionModal({ isOpen, onClose, onUpdate }) {
 
   if (!isOpen) return null;
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    try {
-      const endpoint = activeTab === 'income' ? '/api/finance/income' : '/api/finance/expense';
-      const payload = {
-        amount: Number(formData.amount),
-        date: formData.date,
-        note: formData.note,
-        [activeTab === 'income' ? 'source' : 'category']: formData[activeTab === 'income' ? 'source' : 'category']
-      };
-      
-      await api.post(endpoint, payload);
-      onUpdate();
-      onClose();
+  const handleCompleteClose = () => {
+    onUpdate();
+    onClose();
+    setTimeout(() => {
+      setStep(1);
+      setActiveTab('income');
       setFormData({
         amount: '',
         source: '',
@@ -36,6 +32,85 @@ export default function TransactionModal({ isOpen, onClose, onUpdate }) {
         note: '',
         date: new Date().toISOString().split('T')[0]
       });
+    }, 300); // Reset after modal fade out conceptually
+  };
+  
+  const handleBackToStep1 = () => {
+    setStep(1);
+  };
+
+  const executeLogTransaction = async () => {
+    const endpoint = activeTab === 'income' ? '/api/finance/income' : '/api/finance/expense';
+    const payload = {
+      amount: Number(formData.amount),
+      date: formData.date,
+      note: formData.note,
+      [activeTab === 'income' ? 'source' : 'category']: formData[activeTab === 'income' ? 'source' : 'category']
+    };
+    await api.post(endpoint, payload);
+  };
+
+  const handleSkipToLog = async () => {
+    setIsSubmittingPhase2(true);
+    try {
+      await executeLogTransaction();
+      handleCompleteClose();
+    } catch (err) {
+      console.error(err);
+      alert('Failed to log transaction.');
+    } finally {
+      setIsSubmittingPhase2(false);
+    }
+  };
+
+  const handleSaveBuffer = async () => {
+    setIsSubmittingPhase2(true);
+    try {
+      await executeLogTransaction();
+      await api.put('/api/user/profile', {
+        current_buffer: (summary?.currentBuffer || 0) + suggestedSavings
+      });
+      handleCompleteClose();
+    } catch (e) {
+      console.error(e);
+      alert('Failed to update buffer.');
+    } finally {
+      setIsSubmittingPhase2(false);
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (activeTab === 'income' && summary) {
+      let amount = Number(formData.amount);
+      let suggested = amount * 0.20; 
+      let reason = "We generally suggest saving 20% of your income toward your safety buffer.";
+      
+      const bufferGap = Math.max(0, (summary.emergencyBufferTarget || 0) - (summary.currentBuffer || 0));
+      
+      if (summary.billsDueThisWeek > summary.availableCash) {
+         suggested = amount * 0.10; 
+         reason = "You have high bills coming up compared to your available cash, so we're suggesting a smaller 10% safety buffer for now.";
+      } else if (bufferGap > ((summary.emergencyBufferTarget || 1) * 0.5)) {
+         suggested = amount * 0.30;
+         reason = "Your buffer is less than half full! We strongly recommend aggressive saving (30%) from this income if you can afford it.";
+      }
+      
+      if (suggested > bufferGap && bufferGap > 0) suggested = bufferGap;
+      
+      if (suggested >= 5) {
+         setSuggestedSavings(Math.round(suggested));
+         setSavingsReason(reason);
+         setStep(2);
+         return; 
+      }
+    }
+    
+    // Direct log if expense or negligible suggestion
+    setLoading(true);
+    try {
+      await executeLogTransaction();
+      handleCompleteClose();
     } catch (err) {
       console.error('Error logging transaction:', err);
       alert('Failed to log transaction.');
@@ -43,6 +118,50 @@ export default function TransactionModal({ isOpen, onClose, onUpdate }) {
       setLoading(false);
     }
   };
+
+  if (step === 2) {
+    return (
+      <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div className="bg-app-card w-full max-w-md rounded-card border border-app-border shadow-2xl p-8 text-center animate-in zoom-in duration-200 relative">
+           <div className="absolute top-6 left-6">
+             <button onClick={handleBackToStep1} className="text-[10px] text-app-muted font-bold hover:text-brand transition-colors flex items-center gap-1 uppercase tracking-widest">
+               ← Back
+             </button>
+           </div>
+           
+           <div className="mx-auto w-16 h-16 bg-brand/10 text-brand rounded-full flex items-center justify-center mb-4 mt-2 text-3xl">
+             🛡️
+           </div>
+           <h3 className="text-2xl font-display font-bold text-brand mb-2">Smart Buffer Suggestion</h3>
+           <p className="text-sm text-app-text mb-6">
+             {savingsReason}
+           </p>
+           
+           <div className="bg-app-muted/5 border border-brand/20 rounded-xl p-6 mb-8">
+             <p className="text-[10px] font-mono text-app-muted uppercase tracking-widest mb-2 font-bold">Recommended Buffer Transfer</p>
+             <p className="text-4xl font-mono font-bold text-brand">${suggestedSavings}</p>
+           </div>
+           
+           <div className="flex gap-4">
+             <button 
+               onClick={handleSkipToLog}
+               disabled={isSubmittingPhase2}
+               className="flex-1 py-3 border border-app-border text-app-muted rounded-sm hover:bg-app-muted/5 transition-all text-[10px] font-bold uppercase tracking-widest disabled:opacity-50"
+             >
+               {isSubmittingPhase2 ? 'Saving...' : 'Skip This'}
+             </button>
+             <button 
+               onClick={handleSaveBuffer}
+               disabled={isSubmittingPhase2}
+               className="flex-1 py-3 bg-brand text-white rounded-sm hover:bg-brand-dark transition-all text-[10px] font-bold uppercase tracking-widest shadow-lg shadow-brand/20 disabled:opacity-50"
+             >
+               {isSubmittingPhase2 ? 'Saving...' : 'Add to Buffer'}
+             </button>
+           </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -115,7 +234,7 @@ export default function TransactionModal({ isOpen, onClose, onUpdate }) {
           <div className="flex gap-4 pt-4">
             <button 
               type="button"
-              onClick={onClose}
+              onClick={handleCompleteClose}
               className="flex-1 py-3 border border-app-border text-app-muted rounded-sm hover:bg-app-muted/5 transition-all text-[10px] font-bold uppercase tracking-widest"
             >
               Cancel
