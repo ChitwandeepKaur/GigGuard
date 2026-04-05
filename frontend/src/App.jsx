@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, useLocation, Navigate } from 'react-router-dom'
 import Landing from './pages/Landing'
 import Auth from './pages/Auth'
 import Onboarding from './pages/Onboarding'
@@ -6,6 +6,14 @@ import Dashboard from './pages/Dashboard'
 import InsuranceHub from './pages/InsuranceHub'
 import ChatWindow from './components/chatbot/ChatWindow'
 import Navbar from './components/Navbar'
+
+function ProtectedRoute({ children }) {
+  const token = localStorage.getItem('token');
+  if (!token) {
+    return <Navigate to="/auth" replace />;
+  }
+  return children;
+}
 
 function AppContent() {
   const location = useLocation();
@@ -19,7 +27,7 @@ function AppContent() {
           <Route path="/" element={<Landing />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/onboarding" element={<Onboarding />} />
-          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
           <Route path="/insurance" element={<InsuranceHub />} />
         </Routes>
       </main>

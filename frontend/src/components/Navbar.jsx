@@ -39,10 +39,12 @@ const Navbar = () => {
     navigate('/');
   };
 
+  const isLoggedIn = !!localStorage.getItem('token');
+
   const links = [
     { name: 'Home', path: '/' },
     { name: 'Onboarding', path: '/onboarding' },
-    { name: 'Dashboard', path: '/dashboard' },
+    ...(isLoggedIn ? [{ name: 'Dashboard', path: '/dashboard' }] : []),
     { name: 'Insurance Hub', path: '/insurance' },
   ];
 
