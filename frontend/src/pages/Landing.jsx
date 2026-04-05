@@ -10,12 +10,21 @@ export default function Landing() {
       <p className="text-xl text-app-muted max-w-xl mb-12 font-body italic">
         Financial security for the modern gig economy.
       </p>
-      <Button 
-        onClick={() => navigate('/onboarding')}
-        className="!rounded-[16px] !px-12 !py-4 shadow-lg text-lg transform hover:scale-105"
-      >
-        Get Started
-      </Button>
+      <div className="flex gap-4">
+        <Button 
+          onClick={() => navigate('/onboarding')}
+          className="!rounded-[16px] !px-10 !py-4 shadow-lg text-lg transform hover:scale-105"
+        >
+          Get Started
+        </Button>
+        <Button 
+          variant="secondary"
+          onClick={() => navigate('/auth')}
+          className="!rounded-[16px] !px-10 !py-4 shadow-md text-lg transform hover:scale-105"
+        >
+          Login / Signup
+        </Button>
+      </div>
       
     </div>
   );

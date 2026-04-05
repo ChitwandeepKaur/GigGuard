@@ -42,6 +42,13 @@ export default function Onboarding() {
   };
 
   const handleComplete = async () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      localStorage.setItem('pendingProfile', JSON.stringify(formData));
+      navigate('/auth');
+      return;
+    }
+
     setIsSubmitting(true);
     setError('');
     try {
@@ -50,8 +57,6 @@ export default function Onboarding() {
     } catch (err) {
       console.error(err);
       setError('Failed to save profile. Make sure you are logged in and the server is running properly.');
-      // Fallback navigation occasionally used for demos if backend fails completely
-      // navigate('/dashboard');
     } finally {
       setIsSubmitting(false);
     }

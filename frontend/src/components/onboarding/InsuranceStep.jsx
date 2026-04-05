@@ -65,11 +65,20 @@ export default function InsuranceStep({ formData, isSubmitting, onComplete, onBa
         "{summaryText}"
       </div>
 
-      <div className="text-center">
-        <p className="text-sm text-gray-500 mb-4">Let's see what insurance coverages can protect this baseline.</p>
-        <Button onClick={startAIGeneration} className="w-full py-4 text-lg shadow-md animate-pulse hover:animate-none">
-          Get Recommended Insurances ✨
-        </Button>
+      <div className="text-center flex flex-col gap-4">
+        <div className="flex flex-col gap-2">
+          <p className="text-sm font-semibold text-gray-500">Ready to save your profile?</p>
+          <Button onClick={onComplete} className="w-full py-4 text-lg shadow-md border-brand bg-brand text-white" disabled={isSubmitting}>
+            {isSubmitting ? 'Processing...' : 'Complete Configuration'}
+          </Button>
+        </div>
+
+        <div className="flex flex-col gap-2 mt-4 pt-4 border-t border-gray-100">
+          <p className="text-sm text-gray-500">Let's see what insurance coverages can protect this baseline.</p>
+          <Button onClick={startAIGeneration} variant="secondary" className="w-full py-4 text-lg shadow-md border-brand text-brand">
+            Get Recommended Insurances ✨
+          </Button>
+        </div>
       </div>
 
       <div className="mt-6 pt-4 border-t border-gray-100 flex justify-center">
