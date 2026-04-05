@@ -1,174 +1,82 @@
-# GigGuard
+# 🛡️ GigGuard
 
-> Your financial safety net for unpredictable income
+> **Standard budget apps assume you make $4,000 every single month. Gig workers don't.**
 
-Built for the **State Farm Financial Wellness** hackathon track.
+Built over a caffeine-fueled weekend for the **State Farm Financial Wellness Hackathon**. 
 
----
+## The Problem
+If you drive for Uber, deliver for DoorDash, or freelance online, your income is a chaotic rollercoaster. One week you make $1,200. The next, your car breaks down and you make $200. 
 
-## What It Is
+Traditional finance tools completely fail gig workers. They leave you guessing if you're actually safe to spend, unprepared for the massive 15.3% self-employment tax hit every April, and flying blind on commercial auto coverage.
 
-GigGuard is a financial wellness app built specifically for gig workers — the 73 million Americans whose income is irregular, unpredictable, and completely ignored by every existing budgeting tool.
+## Enter GigGuard
+GigGuard is the financial safety net built natively for income volatility. We throw out the rigid "monthly budget" and replace it with a dynamic, real-time **Safe-to-Spend** number that adjusts every time you log a shift or buy a coffee.
 
-It solves three problems no other app addresses:
+### ✨ What makes it cool?
+* 🎢 **Volatility Native**: We don't magically "average" your income. We base your survival on your *worst* weeks and buffer your *best* weeks using our Windfall Stabilizer.
+* 🚨 **Survival Mode**: If your income dips below what you need to survive, the dashboard locks down and hands you aggressive, pre-calculated Triage Plans to ride out the storm.
+* 💸 **The "Tax Shock" Preventer**: Automatic, real-time tracking of what you actually owe in SE tax, so April is just another month.
+* 🤖 **AI Insurance Hub**: Drag and drop your massive, confusing insurance PDF. Our Gemini-powered AI spits out a 5-second plain-English summary of what is *actually* covered when you have the DoorDash app open, and generates a gamified quiz to test your blind spots!
 
-1. **You don't know how much you can safely spend right now** — GigGuard calculates a real-time "Safe-to-Spend" number based on your income volatility, not a static monthly budget
-2. **The April tax surprise** — GigGuard tracks your self-employment tax obligation in real-time so you're never blindsided
-3. **You're underinsured and don't know it** — GigGuard analyzes your insurance policy in plain English and gamifies learning what's actually covered
+## 🛠️ How we built it
+We wanted this thing to be stupid fast and incredibly reliable.
+* **Frontend**: React 18, Vite, Tailwind CSS, Zustand (for that buttery smooth state).
+* **Backend**: Node.js, Express, Prisma ORM.
+* **Brain**: **Google Gemini 2.5 Flash** reading insurance docs like a lawyer.
+* **Database**: Supabase (PostgreSQL) holding down the data.
 
----
+## 🚀 Run it Locally
 
-## Features
+You'll need Node 18+, a free Supabase project, and a Google Gemini API key.
 
-- **Income Volatility Profiler** — maps your floor, average, and good-week income
-- **Safe-to-Spend This Week** — hero feature: a real-time number based on cash, bills, buffer, and tax reserves
-- **Buffer Health Tracker** — "You can survive X.X bad weeks"
-- **SE Tax Tracker** — real-time tax set-aside + quarterly deadline countdown
-- **Windfall Stabilizer** — guides allocation when you have a great week
-- **Survival Mode** — auto-triggered on low income weeks, generates 3 recovery plans
-- **Shock Event Planner** — instant financial plan for car breakdowns, late payments, etc.
-- **Recovery Plan Generator** — helps you rebuild after a crisis without panic
-- **Insurance Recommendation** — personalized coverage suggestions from your profile
-- **PDF Policy Summary** — upload your insurance doc, get plain-English breakdown
-- **Gamified Quiz** — 5 scenario questions from your actual policy, reveals exact clauses
-- **AI Chatbot** — answers insurance and budgeting questions using your profile + policy
-
----
-
-## Architecture
-
-```
-frontend/ -> React + Vite (frontend)
-backend/  -> Express + Prisma (backend API)
-          -> Supabase (PostgreSQL + Auth + File Storage)
-          -> Google Gemini API (AI features, proxied server-side)
-```
-
-The frontend never touches the Claude API or database directly. All sensitive operations go through the Express backend.
-
----
-
-## Tech Stack
-
-### Frontend
-- React 18 + Vite
-- Tailwind CSS
-- Zustand (client state)
-- Recharts (data visualization)
-- Lucide React (icons)
-- React Router 6
-
-### Backend
-- Node.js + Express
-- Prisma ORM
-- Supabase (PostgreSQL + Auth + Storage)
-- Anthropic Claude SDK
-- pdfjs-dist (PDF text extraction)
-- Multer (file upload handling)
-
-### Hosting
-- Frontend → Vercel
-- Backend → Railway
-
----
-
-## Getting Started
-
-### Prerequisites
-- Node.js 18+
-- A Supabase project (free at supabase.com)
-- A Google Gemini API key
-
-### 1. Clone and install
-
+### 1. Clone & Install
 ```bash
-git clone https://github.com/your-team/GigGuard
+git clone https://github.com/ChitwandeepKaur/GigGuard.git
 cd GigGuard
 
+# Install frontend
 cd frontend && npm install
+
+# Install backend
 cd ../backend && npm install
 ```
 
-### 2. Set up Supabase
-- Create a new project at supabase.com
-- Copy your DATABASE_URL, SUPABASE_URL, SUPABASE_SERVICE_KEY, and SUPABASE_ANON_KEY
+### 2. Environment Variables
+You'll need two `.env` files.
 
-### 3. Configure environment variables
-
-backend/.env
-```
-DATABASE_URL=postgresql://...
-SUPABASE_URL=https://xxx.supabase.co
-SUPABASE_SERVICE_KEY=eyJ...
-GEMINI_API_KEY=your_gemini_api_key_here
+**`backend/.env`**
+```env
+DATABASE_URL=postgresql://[your-supabase-db-url]
+SUPABASE_URL=https://[your-supabase-project].supabase.co
+SUPABASE_SERVICE_KEY=[your-service-key]
+GEMINI_API_KEY=[your-gemini-key]
 PORT=3001
 ```
 
-frontend/.env
-```
+**`frontend/.env`**
+```env
 VITE_API_URL=http://localhost:3001
-VITE_SUPABASE_URL=https://xxx.supabase.co
-VITE_SUPABASE_ANON_KEY=eyJ...
+VITE_SUPABASE_URL=https://[your-supabase-project].supabase.co
+VITE_SUPABASE_ANON_KEY=[your-anon-key]
 ```
 
-### 4. Set up database
-
+### 3. Database Sync & Run!
 ```bash
 cd backend
 npx prisma db push
 npx prisma generate
 ```
 
-### 5. Run the app
-
+Pop open two terminals:
 ```bash
-# Terminal 1 — backend
+# Terminal 1
 cd backend && npm run dev
 
-# Terminal 2 — frontend
+# Terminal 2
 cd frontend && npm run dev
 ```
 
-App runs at http://localhost:5173
+Hit `http://localhost:5173` and click **"Load Demo"** to jump straight into Marcus's dashboard.
 
 ---
-
-## Demo
-
-Click "Load Demo" on the landing page to pre-fill a realistic gig worker profile (Marcus, DoorDash driver) and see all features live without going through onboarding.
-
----
-
-## Deployment
-
-```bash
-# Backend → Railway
-cd backend && railway up
-
-# Frontend → Vercel
-cd frontend && vercel
-# Set VITE_API_URL to your Railway backend URL in Vercel dashboard
-```
-
----
-
-## Docs
-
-| File | Contents |
-|---|---|
-| PRD.md | Full product requirements, feature specs, user personas |
-| DESIGN_SPECS.md | Colors, typography, component specs, layouts |
-| TECH_STACK.md | Frontend stack, code patterns, Zustand stores, calculations |
-| BACKEND.md | Backend architecture, API routes, DB schema, deployment |
-| TEAM_TASKS.md | Hour-by-hour task division for all 4 team members |
-
----
-
-## Team
-
-| Member | Role |
-|---|---|
-| Dev 1 | Frontend Lead — Onboarding + Dashboard + UI components |
-| Dev 2 | Features Dev — Financial calculations + Survival Mode |
-| Dev 3 | AI/Integrations — Express backend + Claude API + Insurance Hub |
-| Dev 4 | UI/Polish + Demo — Animations + design system + presentation |
+*Built with ❤️ for gig workers everywhere.*
